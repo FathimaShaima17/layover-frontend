@@ -13,6 +13,7 @@ import {
   Sparkles,
   Tag,
   ExternalLink,
+  Globe,
 } from 'lucide-react';
 import { Place } from '../../domain/entities/Place';
 import { usePlaces } from '../context/PlacesContext';
@@ -24,6 +25,7 @@ import { StarRating } from '../components/common/StarRating';
 import { Breadcrumbs } from '../components/navigation/Breadcrumbs';
 import { PlaceCard } from '../components/places/PlaceCard';
 import { ShareModal } from '../components/common/ShareModal';
+import { CommunityJournal } from '../components/places/CommunityJournal';
 import {
   getDirectionsUrl,
   getCategoryMeta,
@@ -521,29 +523,49 @@ export const PlaceDetailsPage: React.FC = () => {
                 {formatCoordinates(place.coordinates)}
               </div>
 
-              {hasValidCoords && directionsUrl ? (
-                <a
-                  href={directionsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: 'var(--color-primary-light)',
-                    textDecoration: 'none',
-                  }}
-                >
-                  <span>Open in External Maps</span>
-                  <ExternalLink size={13} />
-                </a>
-              ) : (
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                  Exact coordinates unverified. Navigation unavailable.
-                </span>
-              )}
+              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                {hasValidCoords && (
+                  <Link
+                    to={`/explore/world?q=${encodeURIComponent(place.name)}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: 'var(--color-primary)',
+                      backgroundColor: 'var(--color-primary-subtle)',
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: 'var(--radius-md)',
+                      textDecoration: 'none',
+                    }}
+                    title="Locate this place on the shared 3D geographic canvas"
+                  >
+                    <Globe size={13} />
+                    <span>View in 3D World</span>
+                  </Link>
+                )}
+
+                {hasValidCoords && directionsUrl ? (
+                  <a
+                    href={directionsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: 'var(--color-primary-light)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span>External Maps</span>
+                    <ExternalLink size={13} />
+                  </a>
+                ) : null}
+              </div>
             </div>
 
             {/* Nearby Landmarks if available */}
@@ -577,6 +599,9 @@ export const PlaceDetailsPage: React.FC = () => {
             </div>
           </aside>
         </div>
+
+        {/* Community Photo Journal: "Seen Through Your Eyes" */}
+        <CommunityJournal placeId={place.id} placeName={place.name} />
 
         {/* Similar Destinations Section */}
         {similarPlaces.length > 0 && (

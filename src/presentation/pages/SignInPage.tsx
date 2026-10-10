@@ -1,335 +1,394 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Compass, Bookmark, PlusCircle, Edit3, Check, Award, AlertCircle } from 'lucide-react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Compass,
+  Mail,
+  Lock,
+  AlertCircle,
+  ArrowRight,
+  KeyRound,
+  Sparkles,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useSavedPlaces } from '../context/SavedPlacesContext';
 import { useToast } from '../context/ToastContext';
-import { Breadcrumbs } from '../components/navigation/Breadcrumbs';
 import { Button } from '../components/common/Button';
 
+/**
+ * Demo accounts seeded on the backend — all share the password `demo1234`.
+ */
+const DEMO_ACCOUNTS = [
+  {
+    label: 'Elena Rostova',
+    hint: 'Alpine Guide',
+    email: 'elena.rostova@explorer.org',
+  },
+  {
+    label: 'Mateo Silva',
+    hint: 'Coastal Scout',
+    email: 'mateo.silva@wanderlust.net',
+  },
+  {
+    label: 'Amina Kassam',
+    hint: 'Heritage Chronicler',
+    email: 'amina.k@atlasvoyager.io',
+  },
+] as const;
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+}
+
 export const SignInPage: React.FC = () => {
-  const { user, loginAsDemoUser, updateBio } = useAuth();
-  const { savedCount } = useSavedPlaces();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, isAuthenticated, isLoading } = useAuth();
   const { showToast } = useToast();
 
-  const [isEditingBio, setIsEditingBio] = useState(false);
-  const [bioInput, setBioInput] = useState(user.bio);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSaveBio = () => {
-    updateBio(bioInput);
-    setIsEditingBio(false);
-    showToast('Profile Updated', 'Explorer bio saved to browser storage.', 'success');
+  // Already signed in — send the user where they intended to go
+  const from = (location.state as { from?: string } | null)?.from ?? '/profile';
+  if (isAuthenticated && !isLoading) {
+    return <Navigate to={from} replace />;
+  }
+
+  const validate = (): boolean => {
+    const next: FormErrors = {};
+    if (!email.trim()) {
+      next.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      next.email = 'Please enter a valid email address.';
+    }
+    if (!password) {
+      next.password = 'Password is required.';
+    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
 
-  const handleSwitchPersona = (name: string, email: string) => {
-    loginAsDemoUser(name, email);
-    showToast('Persona Switched', `Now logged in as prototype traveler: ${name}`, 'info');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError('');
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    try {
+      await login(email.trim(), password);
+      showToast('Welcome Back', 'Signed in to your explorer account.', 'success');
+      navigate(from, { replace: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Sign in failed.';
+      setSubmitError(message.includes('401') ? 'Invalid email or password.' : message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  /** Quick-login with one of the seeded demo explorer accounts. */
+  const handleDemoLogin = async (demoEmail: string) => {
+    setSubmitError('');
+    setIsSubmitting(true);
+    try {
+      await login(demoEmail, 'demo1234');
+      showToast('Demo Account', `Signed in as ${demoEmail}`, 'info');
+      navigate(from, { replace: true });
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Demo sign in failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const inputStyle = (hasError?: string): React.CSSProperties => ({
+    width: '100%',
+    padding: '0.8rem 1rem 0.8rem 2.75rem',
+    borderRadius: 'var(--radius-md)',
+    border: `1.5px solid ${hasError ? '#B91C1C' : 'var(--color-border)'}`,
+    backgroundColor: 'var(--bg-app)',
+    fontSize: '0.95rem',
+    color: 'var(--color-text-primary)',
+    outline: 'none',
+    transition: 'border-color var(--transition-fast)',
+  });
 
   return (
-    <div style={{ paddingTop: '2rem', paddingBottom: '6rem' }}>
-      <div className="container" style={{ maxWidth: '820px' }}>
-        <Breadcrumbs items={[{ label: 'Explorer Profile Prototype' }]} />
-
-        {/* Prototype Warning Banner */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '0.85rem',
-            padding: '1rem 1.25rem',
-            borderRadius: 'var(--radius-lg)',
-            backgroundColor: '#FEF3C7',
-            border: '1px solid #FDE68A',
-            color: '#92400E',
-            fontSize: '0.875rem',
-            lineHeight: 1.5,
-            marginBottom: '2.5rem',
-          }}
-        >
-          <AlertCircle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div>
-            <strong>Frontend Prototype Mode</strong>
-            <div>
-              This is a lightweight client-side profile simulator. Real authentication and backend databases are intentionally excluded in this development phase per requirements. No passwords or credentials are stored.
-            </div>
+    <div style={{ paddingTop: '2.5rem', paddingBottom: '6rem' }}>
+      <div className="container" style={{ maxWidth: '460px' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '56px',
+              height: '56px',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'var(--color-primary)',
+              color: '#FFFFFF',
+              marginBottom: '1.25rem',
+              boxShadow: 'var(--shadow-md)',
+            }}
+          >
+            <Compass size={28} />
           </div>
+          <h1
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '2rem',
+              fontWeight: 700,
+              color: 'var(--color-primary)',
+              marginBottom: '0.5rem',
+            }}
+          >
+            Welcome Back, Explorer
+          </h1>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem' }}>
+            Sign in to save hidden gems, submit discoveries, and manage your atlas.
+          </p>
         </div>
 
-        {/* Main Explorer Profile Card */}
+        {/* Sign In Card */}
         <div
           style={{
             backgroundColor: 'var(--bg-surface)',
             borderRadius: 'var(--radius-xl)',
             border: '1px solid var(--color-border)',
-            padding: '2.5rem',
+            padding: '2.25rem',
             boxShadow: 'var(--shadow-md)',
-            marginBottom: '2.5rem',
           }}
         >
-          {/* Top Banner / Avatar */}
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              gap: '1.75rem',
-              marginBottom: '2rem',
-              paddingBottom: '2rem',
-              borderBottom: '1px solid var(--color-border-subtle)',
-            }}
-          >
+          {submitError && (
             <div
               style={{
-                position: 'relative',
-                width: '90px',
-                height: '90px',
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: '3px solid var(--color-primary-light)',
-                boxShadow: 'var(--shadow-sm)',
-                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.6rem',
+                backgroundColor: 'var(--color-error-bg)',
+                border: '1px solid #FECACA',
+                color: 'var(--color-error)',
+                padding: '0.85rem 1rem',
+                borderRadius: 'var(--radius-md)',
+                fontSize: '0.875rem',
+                marginBottom: '1.5rem',
+                lineHeight: 1.5,
               }}
+              role="alert"
             >
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+              <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '1px' }} />
+              <span>{submitError}</span>
             </div>
+          )}
 
-            <div style={{ flex: 1, minWidth: '220px' }}>
-              <div
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Email */}
+            <div style={{ marginBottom: '1.25rem' }}>
+              <label
+                htmlFor="signin-email"
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  fontSize: '0.75rem',
+                  display: 'block',
+                  fontSize: '0.8125rem',
                   fontWeight: 700,
+                  color: 'var(--color-primary)',
                   textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  color: 'var(--color-primary-light)',
-                  backgroundColor: 'var(--color-primary-subtle)',
-                  padding: '0.2rem 0.65rem',
-                  borderRadius: 'var(--radius-full)',
+                  letterSpacing: '0.05em',
                   marginBottom: '0.5rem',
                 }}
               >
-                <Award size={12} />
-                <span>{user.role}</span>
-              </div>
-              <h1
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.85rem',
-                  fontWeight: 700,
-                  color: 'var(--color-primary)',
-                  marginBottom: '0.25rem',
-                }}
-              >
-                {user.name}
-              </h1>
-              <div style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>
-                {user.email}
-              </div>
-            </div>
-          </div>
-
-          {/* Explorer Stats Row */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '1.25rem',
-              marginBottom: '2rem',
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: 'var(--bg-app)',
-                borderRadius: 'var(--radius-md)',
-                padding: '1.25rem',
-                border: '1px solid var(--color-border)',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                {user.contributionsCount}
-              </div>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                Community Submissions
-              </div>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: 'var(--bg-app)',
-                borderRadius: 'var(--radius-md)',
-                padding: '1.25rem',
-                border: '1px solid var(--color-border)',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                {savedCount}
-              </div>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                Saved Bookmarks
-              </div>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: 'var(--bg-app)',
-                borderRadius: 'var(--radius-md)',
-                padding: '1.25rem',
-                border: '1px solid var(--color-border)',
-                textAlign: 'center',
-              }}
-            >
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--color-primary)' }}>
-                100%
-              </div>
-              <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                Verified Scout Accuracy
-              </div>
-            </div>
-          </div>
-
-          {/* Bio Section with Inline Editing */}
-          <div style={{ marginBottom: '2.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <label style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Explorer Bio & Philosophy
+                Email Address
               </label>
-              {!isEditingBio ? (
-                <button
-                  onClick={() => setIsEditingBio(true)}
+              <div style={{ position: 'relative' }}>
+                <Mail
+                  size={17}
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    fontSize: '0.8125rem',
-                    color: 'var(--color-primary-light)',
-                    fontWeight: 600,
+                    position: 'absolute',
+                    left: '0.9rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--color-text-muted)',
+                    pointerEvents: 'none',
                   }}
-                >
-                  <Edit3 size={14} />
-                  <span>Edit Bio</span>
-                </button>
-              ) : (
-                <button
-                  onClick={handleSaveBio}
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    fontSize: '0.8125rem',
-                    color: 'var(--color-primary)',
-                    fontWeight: 700,
-                  }}
-                >
-                  <Check size={14} />
-                  <span>Save</span>
-                </button>
+                />
+                <input
+                  id="signin-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={inputStyle(errors.email)}
+                />
+              </div>
+              {errors.email && (
+                <p style={{ color: '#B91C1C', fontSize: '0.8125rem', marginTop: '0.4rem' }}>
+                  {errors.email}
+                </p>
               )}
             </div>
 
-            {isEditingBio ? (
-              <textarea
-                rows={3}
-                value={bioInput}
-                onChange={(e) => setBioInput(e.target.value)}
+            {/* Password */}
+            <div style={{ marginBottom: '1.75rem' }}>
+              <label
+                htmlFor="signin-password"
                 style={{
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1.5px solid var(--color-border)',
-                  fontSize: '0.9375rem',
-                  lineHeight: 1.6,
+                  display: 'block',
+                  fontSize: '0.8125rem',
+                  fontWeight: 700,
+                  color: 'var(--color-primary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '0.5rem',
                 }}
-              />
-            ) : (
-              <p style={{ fontSize: '0.9375rem', color: 'var(--color-text-secondary)', lineHeight: 1.6, fontStyle: 'italic' }}>
-                "{user.bio}"
-              </p>
-            )}
-          </div>
-
-          {/* Switch Demo Persona */}
-          <div style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '1.75rem' }}>
-            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-text-secondary)', marginBottom: '0.75rem' }}>
-              Switch Demo Traveler Persona:
+              >
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Lock
+                  size={17}
+                  style={{
+                    position: 'absolute',
+                    left: '0.9rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--color-text-muted)',
+                    pointerEvents: 'none',
+                  }}
+                />
+                <input
+                  id="signin-password"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={inputStyle(errors.password)}
+                />
+              </div>
+              {errors.password && (
+                <p style={{ color: '#B91C1C', fontSize: '0.8125rem', marginTop: '0.4rem' }}>
+                  {errors.password}
+                </p>
+              )}
             </div>
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => handleSwitchPersona('Elena Rostova', 'elena.rostova@explorer.org')}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: `1.5px solid ${user.name === 'Elena Rostova' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  backgroundColor: user.name === 'Elena Rostova' ? 'var(--color-primary-subtle)' : 'var(--bg-app)',
-                  color: user.name === 'Elena Rostova' ? 'var(--color-primary)' : 'var(--color-text-primary)',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Elena Rostova (Alpine Guide)
-              </button>
 
-              <button
-                onClick={() => handleSwitchPersona('Mateo Silva', 'mateo.silva@wanderlust.net')}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: `1.5px solid ${user.name === 'Mateo Silva' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  backgroundColor: user.name === 'Mateo Silva' ? 'var(--color-primary-subtle)' : 'var(--bg-app)',
-                  color: user.name === 'Mateo Silva' ? 'var(--color-primary)' : 'var(--color-text-primary)',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Mateo Silva (Coastal Scout)
-              </button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              icon={<ArrowRight size={18} />}
+              disabled={isSubmitting}
+              style={{ width: '100%' }}
+            >
+              {isSubmitting ? 'Signing In…' : 'Sign In'}
+            </Button>
+          </form>
 
-              <button
-                onClick={() => handleSwitchPersona('Amina Kassam', 'amina.k@atlasvoyager.io')}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  border: `1.5px solid ${user.name === 'Amina Kassam' ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  backgroundColor: user.name === 'Amina Kassam' ? 'var(--color-primary-subtle)' : 'var(--bg-app)',
-                  color: user.name === 'Amina Kassam' ? 'var(--color-primary)' : 'var(--color-text-primary)',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Amina Kassam (Heritage Chronicler)
-              </button>
-            </div>
+          <div
+            style={{
+              textAlign: 'center',
+              marginTop: '1.5rem',
+              fontSize: '0.9rem',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            New to HiddenAtlas?{' '}
+            <Link
+              to="/signup"
+              style={{ color: 'var(--color-primary-light)', fontWeight: 700 }}
+            >
+              Create an account
+            </Link>
           </div>
         </div>
 
-        {/* Quick Navigation Links */}
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link to="/saved">
-            <Button variant="outline" icon={<Bookmark size={16} />}>
-              View My Saved Places
-            </Button>
-          </Link>
-          <Link to="/add">
-            <Button variant="primary" icon={<PlusCircle size={16} />}>
-              Submit a New Place
-            </Button>
-          </Link>
-          <Link to="/explore">
-            <Button variant="secondary" icon={<Compass size={16} />}>
-              Explore All Atlas Gems
-            </Button>
-          </Link>
+        {/* Demo accounts */}
+        <div
+          style={{
+            marginTop: '2rem',
+            backgroundColor: 'var(--bg-surface-subtle)',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px dashed var(--color-border)',
+            padding: '1.5rem',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: 'var(--color-text-muted)',
+              marginBottom: '1rem',
+            }}
+          >
+            <KeyRound size={14} />
+            <span>Try a Demo Account</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+            {DEMO_ACCOUNTS.map((demo) => (
+              <button
+                key={demo.email}
+                type="button"
+                onClick={() => void handleDemoLogin(demo.email)}
+                disabled={isSubmitting}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                  padding: '0.7rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--bg-surface)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'border-color var(--transition-fast), transform var(--transition-fast)',
+                }}
+              >
+                <span>
+                  <span style={{ display: 'block', fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-primary)' }}>
+                    {demo.label}
+                  </span>
+                  <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                    {demo.hint} · {demo.email}
+                  </span>
+                </span>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: 'var(--color-primary-light)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  <Sparkles size={13} />
+                  Sign in
+                </span>
+              </button>
+            ))}
+          </div>
+          <p
+            style={{
+              fontSize: '0.75rem',
+              color: 'var(--color-text-muted)',
+              marginTop: '0.85rem',
+              lineHeight: 1.5,
+            }}
+          >
+            All demo accounts use the password <code style={{ fontWeight: 700 }}>demo1234</code>.
+            Accounts are created automatically on the backend on first launch.
+          </p>
         </div>
       </div>
     </div>

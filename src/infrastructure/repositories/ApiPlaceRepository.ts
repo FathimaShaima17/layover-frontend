@@ -4,6 +4,7 @@ import {
   CreatePlaceInput,
 } from '../../domain/repositories/PlaceRepository';
 import { Place } from '../../domain/entities/Place';
+import { AUTH_EXPIRED_EVENT } from '../../shared/constants/authEvents';
 
 /**
  * API response envelope returned by all backend endpoints.
@@ -23,15 +24,24 @@ interface ApiResponse<T> {
  *
  * Set VITE_API_URL in your .env file to point at the backend.
  * Defaults to http://localhost:5000 for local development.
+ *
+ * Authenticated mutations (e.g. POST /api/places) automatically attach
+ * the JWT provided via `setAuthToken()` (managed by AuthContext).
  */
 export class ApiPlaceRepository implements PlaceRepository {
   private readonly baseUrl: string;
+  private authToken: string | null = null;
 
   constructor(baseUrl?: string) {
     this.baseUrl =
       baseUrl ??
       (import.meta.env.VITE_API_URL as string | undefined) ??
       'http://localhost:5000';
+  }
+
+  /** Stores the JWT used for authenticated requests (null clears it). */
+  setAuthToken(token: string | null): void {
+    this.authToken = token;
   }
 
   // ─── Private helpers ────────────────────────────────────────────────────────
@@ -49,13 +59,24 @@ export class ApiPlaceRepository implements PlaceRepository {
   }
 
   private async fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (this.authToken) {
+      headers['Authorization'] = `Bearer ${this.authToken}`;
+    }
+
     const response = await fetch(url, {
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       ...init,
     });
 
     if (!response.ok) {
       const body = (await response.json().catch(() => ({}))) as { error?: string };
+      // Broadcast 401 so the AuthProvider can clear the expired session
+      if (response.status === 401 && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
+      }
       throw new Error(body.error ?? `API error ${response.status}`);
     }
 

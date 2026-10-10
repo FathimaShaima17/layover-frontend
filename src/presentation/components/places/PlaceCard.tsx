@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Bookmark, Heart, Clock } from 'lucide-react';
+import { MapPin, Bookmark, Heart, Compass } from 'lucide-react';
 import { Place } from '../../../domain/entities/Place';
 import { Badge } from '../common/Badge';
 import { StarRating } from '../common/StarRating';
@@ -32,8 +32,8 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
   return (
     <article
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        borderRadius: 'var(--radius-lg)',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 'var(--radius-md)',
         overflow: 'hidden',
         border: '1px solid var(--color-border)',
         boxShadow: 'var(--shadow-sm)',
@@ -51,9 +51,9 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
         style={{
           position: 'relative',
           width: '100%',
-          height: featured ? '260px' : '210px',
+          height: featured ? '260px' : '220px',
           overflow: 'hidden',
-          backgroundColor: 'var(--bg-surface-subtle)',
+          backgroundColor: '#EDE8DE',
           display: 'block',
         }}
       >
@@ -66,7 +66,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.4s ease',
+            transition: 'transform 0.5s ease',
           }}
           className="place-card-img"
         />
@@ -99,38 +99,41 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
             width: '36px',
             height: '36px',
             borderRadius: '50%',
-            backgroundColor: 'rgba(255, 255, 255, 0.92)',
+            backgroundColor: 'rgba(255, 255, 255, 0.94)',
             backdropFilter: 'blur(4px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: saved ? '#B91C1C' : 'var(--color-primary)',
+            color: saved ? 'var(--color-error)' : 'var(--color-forest)',
             boxShadow: 'var(--shadow-sm)',
+            border: '1px solid rgba(221, 212, 192, 0.6)',
             transition: 'transform 0.15s ease, background-color 0.15s ease',
           }}
           className="bookmark-btn"
         >
           {saved ? (
-            <Heart size={18} fill="#B91C1C" strokeWidth={0} />
+            <Heart size={18} fill="var(--color-error)" strokeWidth={0} />
           ) : (
             <Bookmark size={18} strokeWidth={2} />
           )}
         </button>
 
-        {/* Category Pill Tag Bottom Right of Image */}
+        {/* Category Tag Bottom Right */}
         <div
           style={{
             position: 'absolute',
-            bottom: '0.85rem',
-            right: '0.85rem',
+            bottom: '0.75rem',
+            right: '0.75rem',
             zIndex: 2,
             fontSize: '0.75rem',
-            fontWeight: 600,
-            padding: '0.2rem 0.55rem',
+            fontWeight: 700,
+            padding: '0.25rem 0.6rem',
             borderRadius: 'var(--radius-sm)',
-            backgroundColor: 'rgba(26, 32, 28, 0.75)',
+            backgroundColor: 'rgba(41, 43, 37, 0.82)',
             backdropFilter: 'blur(4px)',
             color: '#FFFFFF',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
           }}
         >
           {categoryMeta.label}
@@ -144,6 +147,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
           display: 'flex',
           flexDirection: 'column',
           flex: 1,
+          backgroundColor: '#FFFFFF',
         }}
       >
         {/* Location & Rating Header */}
@@ -153,7 +157,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '0.5rem',
-            marginBottom: '0.5rem',
+            marginBottom: '0.45rem',
           }}
         >
           <div
@@ -161,14 +165,15 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
               display: 'flex',
               alignItems: 'center',
               gap: '0.35rem',
-              color: 'var(--color-text-muted)',
+              color: 'var(--color-earth)',
               fontSize: '0.8125rem',
+              fontWeight: 500,
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
           >
-            <MapPin size={14} style={{ flexShrink: 0, color: 'var(--color-secondary)' }} />
+            <MapPin size={14} style={{ flexShrink: 0, color: 'var(--color-earth)' }} />
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{place.location}</span>
           </div>
 
@@ -179,10 +184,10 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
         <h3
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.2rem',
+            fontSize: '1.25rem',
             fontWeight: 600,
-            lineHeight: 1.35,
-            color: 'var(--color-primary)',
+            lineHeight: 1.3,
+            color: 'var(--color-forest)',
             marginBottom: '0.5rem',
           }}
         >
@@ -202,8 +207,8 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
         <p
           style={{
             fontSize: '0.875rem',
-            lineHeight: 1.55,
-            color: 'var(--color-text-secondary)',
+            lineHeight: 1.6,
+            color: 'var(--color-charcoal-muted)',
             marginBottom: '1rem',
             flex: 1,
           }}
@@ -220,7 +225,7 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
             paddingTop: '0.75rem',
             borderTop: '1px solid var(--color-border-subtle)',
             fontSize: '0.75rem',
-            color: 'var(--color-text-muted)',
+            color: 'var(--color-charcoal-light)',
           }}
         >
           <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
@@ -228,11 +233,12 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
               <span
                 key={tag}
                 style={{
-                  backgroundColor: 'var(--bg-surface-subtle)',
+                  backgroundColor: 'var(--color-parchment-warm)',
                   padding: '0.2rem 0.5rem',
                   borderRadius: 'var(--radius-sm)',
                   fontSize: '0.75rem',
-                  color: 'var(--color-text-secondary)',
+                  color: 'var(--color-earth-dark)',
+                  border: '1px solid var(--color-border)',
                 }}
               >
                 #{tag}
@@ -240,10 +246,10 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
             ))}
           </div>
 
-          {place.estimatedDuration && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <Clock size={12} />
-              <span>{place.estimatedDuration}</span>
+          {place.coordinates && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--color-earth)' }}>
+              <Compass size={12} />
+              <span>Verified Log</span>
             </div>
           )}
         </div>
@@ -253,13 +259,13 @@ export const PlaceCard: React.FC<PlaceCardProps> = ({ place, featured = false })
         .place-card:hover {
           transform: translateY(-4px);
           box-shadow: var(--shadow-lg);
-          border-color: #D1D5DB;
+          border-color: var(--color-forest-light);
         }
         .place-card:hover .place-card-img {
-          transform: scale(1.04);
+          transform: scale(1.05);
         }
         .place-title-link:hover {
-          color: var(--color-primary-light);
+          color: var(--color-forest-light);
         }
         .bookmark-btn:hover {
           transform: scale(1.1);

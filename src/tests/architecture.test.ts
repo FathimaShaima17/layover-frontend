@@ -7,6 +7,8 @@ import { MockPlaceRepository } from '../infrastructure/repositories/MockPlaceRep
 import { GetPlacesUseCase } from '../application/use-cases/GetPlaces';
 import { SubmitPlaceUseCase } from '../application/use-cases/SubmitPlace';
 import { SavePlaceUseCase, ISavedPlacesStorage } from '../application/use-cases/SavePlace';
+import { getNearbyPlacesUseCase } from '../application/use-cases/GetNearbyPlaces';
+import { calculateDiscoveryTrailUseCase } from '../application/use-cases/CalculateDiscoveryTrail';
 import { INITIAL_MOCK_PLACES } from '../data/mockPlaces';
 
 // In-Memory Storage Mock for testing SavePlaceUseCase without browser DOM
@@ -131,6 +133,33 @@ async function runTests() {
   const savedState2 = savePlace.toggleSave('place-01');
   assert(savedState2 === false, 'toggleSave removes destination on second call');
   assert(savePlace.isSaved('place-01') === false, 'isSaved confirms place was unbookmarked');
+
+  // 5. GetNearbyPlacesUseCase Tests
+  console.log('\n5. GetNearbyPlacesUseCase & Geographic Calculation');
+  const anchorPlace = INITIAL_MOCK_PLACES[0]; // Emerald Whispers Gorge (46.3384, 13.5528)
+  const nearbyPlaces = getNearbyPlacesUseCase.executeWithDistance(anchorPlace, INITIAL_MOCK_PLACES, 500);
+  assert(nearbyPlaces.length > 0, 'Discovers destinations within geographic radius');
+  assert(!nearbyPlaces.some((r) => r.place.id === anchorPlace.id), 'Excludes anchor place from its own nearby list');
+  assert(
+    nearbyPlaces.every((r) => r.distanceKm <= 500),
+    'All returned places are strictly within 500 km radius'
+  );
+  if (nearbyPlaces.length >= 2) {
+    assert(
+      nearbyPlaces[0].distanceKm <= nearbyPlaces[1].distanceKm,
+      'Nearby places are sorted from closest to farthest'
+    );
+  }
+
+  // 6. CalculateDiscoveryTrailUseCase Tests
+  console.log('\n6. CalculateDiscoveryTrailUseCase');
+  const trailStops = [INITIAL_MOCK_PLACES[0], INITIAL_MOCK_PLACES[1]];
+  const trail = calculateDiscoveryTrailUseCase.execute(trailStops);
+  assert(trail.stops.length === 2, 'Maintains 2 trail waypoints');
+  assert(trail.legs.length === 1, 'Creates 1 leg between 2 waypoints');
+  assert(trail.totalDistanceKm > 0, 'Computes positive cumulative distance');
+  assert(trail.googleMapsUrl !== null && trail.googleMapsUrl.includes('origin='), 'Generates valid multi-stop directions URL');
+  assert(trail.disclaimer.includes('Straight-line'), 'Provides clear straight-line geographic disclaimer');
 
   console.log(`\n================================`);
   console.log(`Results: ${passed} Passed, ${failed} Failed`);

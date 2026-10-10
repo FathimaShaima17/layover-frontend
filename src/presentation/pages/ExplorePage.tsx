@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Compass } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Compass, Globe, LayoutGrid } from 'lucide-react';
 import { PlaceCategory, PlaceType } from '../../domain/entities/Place';
 import { SortOption } from '../../domain/repositories/PlaceRepository';
 import { usePlaces } from '../context/PlacesContext';
@@ -134,16 +134,75 @@ export const ExplorePage: React.FC = () => {
         {/* Navigation Breadcrumbs */}
         <Breadcrumbs items={[{ label: 'Explore Atlas' }]} />
 
-        {/* Page Header */}
-        <div style={{ marginBottom: '2.5rem' }}>
-          <div className="section-eyebrow">
-            <Compass size={14} />
-            <span>Destination Catalog</span>
+        {/* Page Header & View Toggle */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1.25rem',
+            marginBottom: '2.5rem',
+          }}
+        >
+          <div>
+            <div className="section-eyebrow">
+              <Compass size={14} />
+              <span>Destination Catalog</span>
+            </div>
+            <h1 className="section-title">Explore Hidden Gems & Landmarks</h1>
+            <p className="section-subtitle">
+              Search our growing repository of verified community spots, secluded nature escapes, and authentic cultural locations.
+            </p>
           </div>
-          <h1 className="section-title">Explore Hidden Gems & Landmarks</h1>
-          <p className="section-subtitle">
-            Search our growing repository of verified community spots, secluded nature escapes, and authentic cultural locations.
-          </p>
+
+          {/* View Mode Toggle: Catalog vs 3D World */}
+          <div
+            style={{
+              display: 'inline-flex',
+              backgroundColor: 'var(--bg-surface)',
+              padding: '4px',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--color-border)',
+              boxShadow: 'var(--shadow-sm)',
+            }}
+          >
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'var(--color-primary)',
+                color: '#FFFFFF',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+              }}
+            >
+              <LayoutGrid size={15} />
+              <span>Catalog View</span>
+            </span>
+            <Link
+              to={`/explore/world?${searchParams.toString()}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--color-text-secondary)',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                textDecoration: 'none',
+                transition: 'all 0.15s ease',
+              }}
+              title="Open the Shared 3D Geographic World"
+            >
+              <Globe size={15} />
+              <span>3D World</span>
+            </Link>
+          </div>
         </div>
 
         {/* Interactive Filter Bar */}

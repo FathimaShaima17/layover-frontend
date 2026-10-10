@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Compass, Bookmark, PlusCircle, Globe, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Compass, Bookmark, PlusCircle, Globe, Menu, X, LogIn, LogOut } from 'lucide-react';
 import { useSavedPlaces } from '../../context/SavedPlacesContext';
 import { useAuth } from '../../context/AuthContext';
 import { FutureWorldModal } from '../common/FutureWorldModal';
@@ -9,10 +9,17 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { savedCount } = useSavedPlaces();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    setMobileMenuOpen(false);
+    navigate('/');
+  };
 
   return (
     <header
@@ -20,7 +27,7 @@ export const Navbar: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        backgroundColor: 'rgba(250, 248, 245, 0.92)',
+        backgroundColor: 'rgba(245, 240, 227, 0.94)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--color-border)',
         height: 'var(--nav-height)',
@@ -29,38 +36,39 @@ export const Navbar: React.FC = () => {
       }}
     >
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {/* Logo */}
+        {/* Logo / Expedition Header Title */}
         <Link
           to="/"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.65rem',
+            gap: '0.75rem',
             textDecoration: 'none',
           }}
         >
           <div
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
-              backgroundColor: 'var(--color-primary)',
+              width: '42px',
+              height: '42px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--color-forest)',
+              border: '1px solid var(--color-forest-dark)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               color: '#FFFFFF',
-              boxShadow: 'var(--shadow-sm)',
+              boxShadow: '0 2px 6px rgba(52, 74, 55, 0.25)',
             }}
           >
-            <Compass size={22} strokeWidth={2.2} />
+            <Compass size={24} strokeWidth={2.2} />
           </div>
           <div>
             <div
               style={{
                 fontFamily: 'var(--font-serif)',
-                fontSize: '1.35rem',
+                fontSize: '1.45rem',
                 fontWeight: 700,
-                color: 'var(--color-primary)',
+                color: 'var(--color-forest)',
                 letterSpacing: '-0.02em',
                 lineHeight: 1.1,
               }}
@@ -70,13 +78,13 @@ export const Navbar: React.FC = () => {
             <div
               style={{
                 fontSize: '0.6875rem',
-                fontWeight: 600,
-                color: 'var(--color-text-muted)',
-                letterSpacing: '0.06em',
+                fontWeight: 700,
+                color: 'var(--color-earth)',
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
               }}
             >
-              Community Travel
+              Expedition Journal
             </div>
           </div>
         </Link>
@@ -86,7 +94,7 @@ export const Navbar: React.FC = () => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1.75rem',
+            gap: '2rem',
           }}
           className="desktop-nav"
         >
@@ -94,26 +102,26 @@ export const Navbar: React.FC = () => {
             to="/explore"
             style={{
               fontSize: '0.9375rem',
-              fontWeight: 500,
-              color: isActive('/explore') ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-              borderBottom: isActive('/explore') ? '2px solid var(--color-primary)' : '2px solid transparent',
+              fontWeight: 600,
+              color: isActive('/explore') ? 'var(--color-forest)' : 'var(--color-charcoal-muted)',
+              borderBottom: isActive('/explore') ? '2px solid var(--color-forest)' : '2px solid transparent',
               paddingBottom: '4px',
               transition: 'color var(--transition-fast)',
             }}
           >
-            Explore
+            Explore Atlas
           </Link>
 
           <Link
             to="/saved"
             style={{
               fontSize: '0.9375rem',
-              fontWeight: 500,
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.4rem',
-              color: isActive('/saved') ? 'var(--color-primary)' : 'var(--color-text-secondary)',
-              borderBottom: isActive('/saved') ? '2px solid var(--color-primary)' : '2px solid transparent',
+              color: isActive('/saved') ? 'var(--color-forest)' : 'var(--color-charcoal-muted)',
+              borderBottom: isActive('/saved') ? '2px solid var(--color-forest)' : '2px solid transparent',
               paddingBottom: '4px',
               transition: 'color var(--transition-fast)',
             }}
@@ -123,7 +131,7 @@ export const Navbar: React.FC = () => {
             {savedCount > 0 && (
               <span
                 style={{
-                  backgroundColor: 'var(--color-primary)',
+                  backgroundColor: 'var(--color-forest)',
                   color: '#FFFFFF',
                   fontSize: '0.6875rem',
                   fontWeight: 700,
@@ -138,29 +146,37 @@ export const Navbar: React.FC = () => {
             )}
           </Link>
 
-          {/* 3D Atlas Coming Soon indicator button */}
-          <button
-            type="button"
-            onClick={() => setIs3DModalOpen(true)}
-            title="Learn about the Phase 2 3D World architecture"
+          {/* 3D Geographic World link */}
+          <Link
+            to="/explore/world"
             style={{
+              fontSize: '0.9375rem',
+              fontWeight: 600,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.35rem',
-              fontSize: '0.8125rem',
-              fontWeight: 600,
-              color: 'var(--color-primary-light)',
-              backgroundColor: 'var(--color-primary-subtle)',
-              padding: '0.25rem 0.65rem',
-              borderRadius: 'var(--radius-full)',
-              cursor: 'pointer',
-              border: '1px solid #B7E4C7',
-              transition: 'all 0.15s ease',
+              gap: '0.4rem',
+              color: isActive('/explore/world') ? 'var(--color-forest)' : 'var(--color-charcoal-muted)',
+              borderBottom: isActive('/explore/world') ? '2px solid var(--color-forest)' : '2px solid transparent',
+              paddingBottom: '4px',
+              transition: 'color var(--transition-fast)',
             }}
           >
-            <Globe size={13} />
-            <span>3D World • Soon</span>
-          </button>
+            <Globe size={16} />
+            <span>3D World</span>
+            <span
+              style={{
+                backgroundColor: 'var(--color-forest-light)',
+                color: '#FFFFFF',
+                fontSize: '0.625rem',
+                fontWeight: 700,
+                borderRadius: '999px',
+                padding: '1px 6px',
+                letterSpacing: '0.04em',
+              }}
+            >
+              3D
+            </span>
+          </Link>
         </nav>
 
         {/* Right CTA Actions */}
@@ -168,7 +184,7 @@ export const Navbar: React.FC = () => {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '1rem',
+            gap: '0.75rem',
           }}
           className="desktop-actions"
         >
@@ -178,64 +194,126 @@ export const Navbar: React.FC = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.4rem',
+                gap: '0.45rem',
               }}
             >
               <PlusCircle size={16} />
-              <span>Share a Place</span>
+              <span>Share a Discovery</span>
             </button>
           </Link>
 
-          <Link
-            to="/profile"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              textDecoration: 'none',
-              padding: '0.35rem 0.65rem',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--bg-surface)',
-              transition: 'border-color var(--transition-fast)',
-            }}
-            title="Explorer Profile"
-          >
-            <img
-              src={user.avatarUrl}
-              alt={user.name}
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '50%',
-                objectFit: 'cover',
-              }}
-            />
-            <span
-              style={{
-                fontSize: '0.8125rem',
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-                maxWidth: '90px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {user.name.split(' ')[0]}
-            </span>
-          </Link>
+          {user ? (
+            <>
+              {/* Authenticated explorer chip */}
+              <Link
+                to="/profile"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  textDecoration: 'none',
+                  padding: '0.35rem 0.65rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: '#FFFFFF',
+                  transition: 'border-color var(--transition-fast)',
+                }}
+                title="Explorer Profile"
+              >
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <span
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--color-forest)',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {user.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <span
+                  style={{
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: 'var(--color-charcoal)',
+                    maxWidth: '90px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {user.name.split(' ')[0]}
+                </span>
+              </Link>
+
+              {/* Sign Out */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Sign out"
+                aria-label="Sign out"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--color-border)',
+                  backgroundColor: '#FFFFFF',
+                  color: 'var(--color-charcoal-muted)',
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                <LogOut size={16} />
+              </button>
+            </>
+          ) : (
+            <Link to="/signin">
+              <button
+                className="btn btn-secondary btn-sm"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                }}
+              >
+                <LogIn size={16} />
+                <span>Sign In</span>
+              </button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
         <button
+          type="button"
           className="mobile-toggle"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
           style={{
             display: 'none',
             padding: '0.5rem',
-            color: 'var(--color-primary)',
+            color: 'var(--color-forest)',
           }}
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -250,12 +328,12 @@ export const Navbar: React.FC = () => {
             top: 'var(--nav-height)',
             left: 0,
             right: 0,
-            backgroundColor: 'var(--bg-surface)',
+            backgroundColor: 'var(--color-parchment-light)',
             borderBottom: '1px solid var(--color-border)',
             padding: '1.25rem',
             display: 'flex',
             flexDirection: 'column',
-            gap: '1rem',
+            gap: '0.75rem',
             boxShadow: 'var(--shadow-lg)',
           }}
         >
@@ -266,10 +344,26 @@ export const Navbar: React.FC = () => {
               fontSize: '1rem',
               fontWeight: 600,
               padding: '0.5rem 0',
-              color: 'var(--color-primary)',
+              color: 'var(--color-forest)',
             }}
           >
-            Explore Destinations
+            Explore Atlas
+          </Link>
+          <Link
+            to="/explore/world"
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              fontSize: '1rem',
+              fontWeight: 600,
+              padding: '0.5rem 0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              color: 'var(--color-forest)',
+            }}
+          >
+            <Globe size={18} />
+            <span>3D Geographic World</span>
           </Link>
           <Link
             to="/saved"
@@ -281,7 +375,7 @@ export const Navbar: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              color: 'var(--color-primary)',
+              color: 'var(--color-forest)',
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -291,7 +385,7 @@ export const Navbar: React.FC = () => {
             {savedCount > 0 && (
               <span
                 style={{
-                  backgroundColor: 'var(--color-primary)',
+                  backgroundColor: 'var(--color-forest)',
                   color: '#FFFFFF',
                   fontSize: '0.75rem',
                   fontWeight: 700,
@@ -306,36 +400,62 @@ export const Navbar: React.FC = () => {
           <Link
             to="/add"
             onClick={() => setMobileMenuOpen(false)}
-            style={{
-              padding: '0.5rem 0',
-            }}
+            style={{ padding: '0.5rem 0' }}
           >
             <button className="btn btn-primary" style={{ width: '100%' }}>
               <PlusCircle size={18} />
-              <span>Share a Place</span>
+              <span>Share a Discovery</span>
             </button>
           </Link>
-          <Link
-            to="/profile"
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              padding: '0.5rem 0',
-              borderTop: '1px solid var(--color-border-subtle)',
-            }}
-          >
-            <img
-              src={user.avatarUrl}
-              alt={user.name}
-              style={{ width: '32px', height: '32px', borderRadius: '50%', objectFit: 'cover' }}
-            />
-            <div>
-              <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{user.name}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{user.role}</div>
+
+          {user ? (
+            <>
+              <Link
+                to="/profile"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.5rem 0',
+                  borderTop: '1px solid var(--color-border-subtle)',
+                }}
+              >
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-forest)' }}>{user.name}</div>
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 0',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  color: 'var(--color-error)',
+                  cursor: 'pointer',
+                }}
+              >
+                <LogOut size={18} />
+                <span>Sign Out</span>
+              </button>
+            </>
+          ) : (
+            <div style={{ display: 'flex', gap: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid var(--color-border-subtle)' }}>
+              <Link to="/signin" onClick={() => setMobileMenuOpen(false)} style={{ flex: 1 }}>
+                <button className="btn btn-secondary" style={{ width: '100%' }}>
+                  <LogIn size={18} />
+                  <span>Sign In</span>
+                </button>
+              </Link>
+              <Link to="/signup" onClick={() => setMobileMenuOpen(false)} style={{ flex: 1 }}>
+                <button className="btn btn-primary" style={{ width: '100%' }}>
+                  <span>Create Account</span>
+                </button>
+              </Link>
             </div>
-          </Link>
+          )}
         </div>
       )}
 
@@ -350,7 +470,6 @@ export const Navbar: React.FC = () => {
           }
         }
       `}</style>
-      {/* 3D World Information Modal */}
       <FutureWorldModal isOpen={is3DModalOpen} onClose={() => setIs3DModalOpen(false)} />
     </header>
   );

@@ -7,9 +7,9 @@ import {
   ArrowRight,
   PlusCircle,
   Globe,
+  Feather,
   Flame,
-  Clock,
-  CheckCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { usePlaces } from '../context/PlacesContext';
 import { CATEGORIES } from '../../shared/constants/categories';
@@ -18,7 +18,7 @@ import { Button } from '../components/common/Button';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { hiddenGems, trendingPlaces, recentPlaces } = usePlaces();
+  const { hiddenGems, trendingPlaces } = usePlaces();
   const [heroSearch, setHeroSearch] = useState('');
 
   const handleHeroSearch = (e: React.FormEvent) => {
@@ -32,102 +32,95 @@ export const HomePage: React.FC = () => {
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* 1. Cinematic Expedition Hero */}
       <section
         style={{
           position: 'relative',
-          paddingTop: '4.5rem',
-          paddingBottom: '5.5rem',
-          backgroundColor: '#FAF8F5',
-          borderBottom: '1px solid var(--color-border)',
+          paddingTop: '6rem',
+          paddingBottom: '7.5rem',
+          backgroundColor: '#1E2D22',
+          color: '#FAF7F0',
+          backgroundImage: `linear-gradient(180deg, rgba(30, 45, 34, 0.72) 0%, rgba(20, 31, 23, 0.88) 100%), url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=85')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 35%',
           overflow: 'hidden',
         }}
       >
-        {/* Subtle decorative radial background */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '-20%',
-            right: '-10%',
-            width: '600px',
-            height: '600px',
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(216, 243, 220, 0.45) 0%, rgba(250, 248, 245, 0) 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        <div className="container" style={{ position: 'relative', zIndex: 1, maxWidth: '980px', textAlign: 'center' }}>
-          {/* Eyebrow badge */}
+        <div className="container" style={{ position: 'relative', zIndex: 3, maxWidth: '980px', textAlign: 'center' }}>
+          {/* Expedition Eyebrow */}
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.5rem',
-              backgroundColor: 'var(--color-primary-subtle)',
-              color: 'var(--color-primary)',
-              padding: '0.4rem 0.9rem',
+              backgroundColor: 'rgba(197, 178, 140, 0.2)',
+              border: '1px solid rgba(197, 178, 140, 0.45)',
+              backdropFilter: 'blur(6px)',
+              color: 'var(--color-sand)',
+              padding: '0.4rem 1rem',
               borderRadius: 'var(--radius-full)',
               fontSize: '0.8125rem',
               fontWeight: 700,
-              letterSpacing: '0.04em',
+              letterSpacing: '0.1em',
               textTransform: 'uppercase',
-              marginBottom: '1.5rem',
+              marginBottom: '1.75rem',
             }}
           >
             <Compass size={15} />
-            <span>Community-Driven Travel Discovery</span>
+            <span>Curated Expedition Journal & Community Atlas</span>
           </div>
 
-          {/* Main Headline */}
+          {/* Headline */}
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: 'clamp(2.5rem, 5.5vw, 4.25rem)',
+              fontSize: 'clamp(2.5rem, 5.5vw, 4.4rem)',
               fontWeight: 700,
               lineHeight: 1.15,
-              color: 'var(--color-primary)',
+              color: '#FAF7F0',
               letterSpacing: '-0.025em',
               marginBottom: '1.5rem',
+              textShadow: '0 2px 14px rgba(0,0,0,0.3)',
             }}
           >
             Discover the World Beyond the Tourist Map.
           </h1>
 
-          {/* Supporting Text */}
+          {/* Subtitle */}
           <p
             style={{
               fontSize: 'clamp(1.05rem, 2vw, 1.25rem)',
-              color: 'var(--color-text-secondary)',
-              maxWidth: '720px',
+              color: 'rgba(250, 247, 240, 0.88)',
+              maxWidth: '740px',
               margin: '0 auto 2.5rem',
-              lineHeight: 1.6,
+              lineHeight: 1.7,
+              fontWeight: 400,
             }}
           >
-            Hidden waterfalls, untouched alpine viewpoints, secret coves, and historical shrines
-            curated by local travelers and passionate explorers around the globe.
+            A collective field log of secret gorges, misty alpine ridgelines, secluded coastal grottos,
+            and personal stories chronicled by travelers who walked them.
           </p>
 
-          {/* Destination Search Bar */}
+          {/* Search Field */}
           <form
             onSubmit={handleHeroSearch}
             style={{
               maxWidth: '680px',
-              margin: '0 auto 2rem',
-              backgroundColor: 'var(--bg-surface)',
+              margin: '0 auto 2.25rem',
+              backgroundColor: '#FFFFFF',
               borderRadius: 'var(--radius-xl)',
               padding: '0.5rem 0.5rem 0.5rem 1.25rem',
               display: 'flex',
               alignItems: 'center',
               gap: '0.75rem',
-              boxShadow: 'var(--shadow-lg)',
-              border: '1.5px solid var(--color-border)',
+              boxShadow: '0 12px 36px rgba(0, 0, 0, 0.28)',
+              border: '2px solid var(--color-sand)',
             }}
           >
-            <Search size={22} style={{ color: 'var(--color-primary-light)', flexShrink: 0 }} />
+            <Search size={22} style={{ color: 'var(--color-forest)', flexShrink: 0 }} />
             <input
               type="text"
-              placeholder="Search secret gorges, sea caves, mountain passes..."
+              placeholder="Search secret waterfalls, mountain passes, sea caves..."
               value={heroSearch}
               onChange={(e) => setHeroSearch(e.target.value)}
               style={{
@@ -136,7 +129,7 @@ export const HomePage: React.FC = () => {
                 outline: 'none',
                 fontSize: '1rem',
                 backgroundColor: 'transparent',
-                color: 'var(--color-text-primary)',
+                color: 'var(--color-charcoal)',
               }}
             />
             <Button type="submit" variant="primary" size="md">
@@ -144,7 +137,7 @@ export const HomePage: React.FC = () => {
             </Button>
           </form>
 
-          {/* Action CTAs */}
+          {/* Actions */}
           <div
             style={{
               display: 'flex',
@@ -155,36 +148,65 @@ export const HomePage: React.FC = () => {
             }}
           >
             <Link to="/explore">
-              <Button variant="primary" size="lg" icon={<Sparkles size={18} />}>
-                Start Exploring
-              </Button>
+              <button
+                className="btn btn-primary btn-lg"
+                style={{
+                  backgroundColor: 'var(--color-sand)',
+                  color: 'var(--color-charcoal)',
+                  borderColor: 'var(--color-sand)',
+                }}
+              >
+                <Compass size={18} />
+                <span>Begin Exploring</span>
+              </button>
             </Link>
 
             <Link to="/add">
-              <Button
-                variant="outline"
-                size="lg"
-                icon={<PlusCircle size={18} />}
+              <button
+                className="btn btn-secondary btn-lg"
+                style={{
+                  backgroundColor: 'rgba(250, 247, 240, 0.15)',
+                  color: '#FAF7F0',
+                  borderColor: 'rgba(250, 247, 240, 0.4)',
+                  backdropFilter: 'blur(6px)',
+                }}
               >
-                Share a Hidden Place
-              </Button>
+                <PlusCircle size={18} />
+                <span>Share a Discovery</span>
+              </button>
+            </Link>
+
+            <Link to="/explore/world">
+              <button
+                className="btn btn-outline btn-lg"
+                style={{
+                  color: '#FAF7F0',
+                  borderColor: 'rgba(197, 178, 140, 0.7)',
+                }}
+              >
+                <Globe size={18} />
+                <span>3D Geographic World</span>
+              </button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Category Cards Section */}
-      <section style={{ padding: '5rem 0', backgroundColor: 'var(--bg-surface)' }}>
+      {/* 2. Torn Paper Transition Divider */}
+      <div className="torn-edge-bottom" style={{ backgroundColor: 'var(--color-parchment)', height: '24px' }} />
+
+      {/* 3. Expedition Highlights by Theme / Category */}
+      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--color-parchment)' }}>
         <div className="container">
           <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <div className="section-eyebrow">
                 <Compass size={14} />
-                <span>Curated Landscapes</span>
+                <span>Atlas Chapters</span>
               </div>
-              <h2 className="section-title">Explore by Category</h2>
+              <h2 className="section-title">Expedition Categories</h2>
               <p className="section-subtitle">
-                From secluded coastal grottos to century-old cellar taverns and high alpine ridgelines.
+                Explore curated archives arranged by geographic terrains, from emerald rivers to centuries-old stone monasteries.
               </p>
             </div>
             <Link
@@ -192,13 +214,13 @@ export const HomePage: React.FC = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.35rem',
-                fontWeight: 600,
-                color: 'var(--color-primary-light)',
+                gap: '0.4rem',
+                fontWeight: 700,
+                color: 'var(--color-forest)',
                 fontSize: '0.9375rem',
               }}
             >
-              <span>View all categories</span>
+              <span>View complete atlas</span>
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -207,7 +229,7 @@ export const HomePage: React.FC = () => {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '1.25rem',
+              gap: '1.5rem',
             }}
           >
             {CATEGORIES.map((category) => (
@@ -215,22 +237,23 @@ export const HomePage: React.FC = () => {
                 key={category.key}
                 to={`/explore?category=${category.key}`}
                 style={{
-                  backgroundColor: 'var(--bg-app)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '1.5rem',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '1.75rem',
                   border: '1px solid var(--color-border)',
+                  boxShadow: 'var(--shadow-sm)',
                   transition: 'transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal)',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
+                  gap: '0.85rem',
                   textDecoration: 'none',
                 }}
                 className="category-card"
               >
                 <div
                   style={{
-                    width: '44px',
-                    height: '44px',
+                    width: '46px',
+                    height: '46px',
                     borderRadius: 'var(--radius-md)',
                     backgroundColor: category.bgLight,
                     color: category.accentColor,
@@ -240,13 +263,13 @@ export const HomePage: React.FC = () => {
                     fontWeight: 700,
                   }}
                 >
-                  <Compass size={22} color={category.accentColor} />
+                  <Compass size={24} color={category.accentColor} />
                 </div>
                 <h3
                   style={{
                     fontFamily: 'var(--font-serif)',
-                    fontSize: '1.2rem',
-                    color: 'var(--color-primary)',
+                    fontSize: '1.25rem',
+                    color: 'var(--color-forest)',
                     fontWeight: 600,
                     margin: 0,
                   }}
@@ -255,9 +278,9 @@ export const HomePage: React.FC = () => {
                 </h3>
                 <p
                   style={{
-                    fontSize: '0.85rem',
-                    color: 'var(--color-text-secondary)',
-                    lineHeight: 1.5,
+                    fontSize: '0.875rem',
+                    color: 'var(--color-charcoal-muted)',
+                    lineHeight: 1.6,
                     margin: 0,
                     flex: 1,
                   }}
@@ -267,14 +290,14 @@ export const HomePage: React.FC = () => {
                 <span
                   style={{
                     fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: 'var(--color-primary-light)',
+                    fontWeight: 700,
+                    color: 'var(--color-forest-light)',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '0.3rem',
+                    gap: '0.35rem',
                   }}
                 >
-                  <span>Discover spots</span>
+                  <span>Explore entries</span>
                   <ArrowRight size={14} />
                 </span>
               </Link>
@@ -283,18 +306,18 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Hidden Gems Near You Section */}
-      <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--bg-app)' }}>
+      {/* 4. Hidden Gems Editorial Section with Warm Parchment & Polaroid accents */}
+      <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--color-parchment-light)', borderTop: '1px solid var(--color-border)' }}>
         <div className="container">
           <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <div className="section-eyebrow">
                 <Sparkles size={14} />
-                <span>Off The Beaten Path</span>
+                <span>Uncharted Discoveries</span>
               </div>
-              <h2 className="section-title">Hidden Gems Near You</h2>
+              <h2 className="section-title">Off the Beaten Path</h2>
               <p className="section-subtitle">
-                Secluded natural wonders and peaceful sanctuaries without tourist crowds.
+                Secluded spots, quiet viewpoints, and secret corners verified by local contributors.
               </p>
             </div>
             <Link
@@ -302,13 +325,13 @@ export const HomePage: React.FC = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.35rem',
-                fontWeight: 600,
-                color: 'var(--color-primary-light)',
+                gap: '0.4rem',
+                fontWeight: 700,
+                color: 'var(--color-forest)',
                 fontSize: '0.9375rem',
               }}
             >
-              <span>Explore all gems</span>
+              <span>Explore all hidden gems</span>
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -316,7 +339,7 @@ export const HomePage: React.FC = () => {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
               gap: '2rem',
             }}
           >
@@ -327,387 +350,173 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Trending Destinations Section */}
-      <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--bg-surface)' }}>
+      {/* 5. Scrapbook Travel Manifesto & Explorer's Log */}
+      <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--color-parchment)', borderTop: '1px solid var(--color-border)' }}>
         <div className="container">
-          <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <div className="section-eyebrow">
-                <Flame size={14} color="#D97706" />
-                <span style={{ color: '#D97706' }}>Community Favorites</span>
-              </div>
-              <h2 className="section-title">Trending Destinations</h2>
-              <p className="section-subtitle">
-                Highest-rated discoveries currently capturing traveler imaginations.
-              </p>
-            </div>
-            <Link
-              to="/explore?sort=popular"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                fontWeight: 600,
-                color: 'var(--color-primary-light)',
-                fontSize: '0.9375rem',
-              }}
-            >
-              <span>View all trending</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '2rem',
-            }}
-          >
-            {trendingPlaces.slice(0, 3).map((place) => (
-              <PlaceCard key={place.id} place={place} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Recently Discovered Section */}
-      <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--bg-app)' }}>
-        <div className="container">
-          <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <div className="section-eyebrow">
-                <Clock size={14} />
-                <span>Latest Findings</span>
-              </div>
-              <h2 className="section-title">Recently Discovered</h2>
-              <p className="section-subtitle">
-                Fresh additions contributed by explorers in your current session and local guides.
-              </p>
-            </div>
-            <Link
-              to="/explore?sort=newest"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                fontWeight: 600,
-                color: 'var(--color-primary-light)',
-                fontSize: '0.9375rem',
-              }}
-            >
-              <span>View newest</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '2rem',
-            }}
-          >
-            {recentPlaces.slice(0, 3).map((place) => (
-              <PlaceCard key={place.id} place={place} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How HiddenAtlas Works Section */}
-      <section
-        style={{
-          padding: '6rem 0',
-          backgroundColor: '#1E382B',
-          color: '#FFFFFF',
-        }}
-      >
-        <div className="container">
-          <div style={{ textAlign: 'center', maxWidth: '680px', margin: '0 auto 4rem' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                color: '#D8F3DC',
-                fontSize: '0.8125rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                marginBottom: '0.75rem',
-              }}
-            >
-              <Compass size={15} />
-              <span>Community Ethos</span>
-            </div>
-            <h2
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '2.5rem',
-                color: '#FFFFFF',
-                marginBottom: '1rem',
-              }}
-            >
-              How HiddenAtlas Works
-            </h2>
-            <p style={{ color: '#C4D7CC', fontSize: '1.0625rem', lineHeight: 1.6 }}>
-              We believe in respectful exploration: uncovering untouched nature, preserving local communities, and keeping accurate geographical records.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '2.5rem',
-            }}
-          >
-            {/* Step 1 */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '2.25rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              <div
-                style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '14px',
-                  backgroundColor: 'rgba(216, 243, 220, 0.15)',
-                  color: '#D8F3DC',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '1.5rem',
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                }}
-              >
-                01
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.35rem',
-                  marginBottom: '0.75rem',
-                  color: '#FFFFFF',
-                }}
-              >
-                Uncover Secret Spots
-              </h3>
-              <p style={{ color: '#B0C2B8', fontSize: '0.9375rem', lineHeight: 1.65 }}>
-                Browse destinations mapped with exact GPS coordinates, verified terrain access notes, and local stories passed down by neighborhood scouts.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '2.25rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              <div
-                style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '14px',
-                  backgroundColor: 'rgba(216, 243, 220, 0.15)',
-                  color: '#D8F3DC',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '1.5rem',
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                }}
-              >
-                02
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.35rem',
-                  marginBottom: '0.75rem',
-                  color: '#FFFFFF',
-                }}
-              >
-                Experience Like a Local
-              </h3>
-              <p style={{ color: '#B0C2B8', fontSize: '0.9375rem', lineHeight: 1.65 }}>
-                Skip tourist traps. Learn the best hours to visit, historical lore, secret cellar eateries, and trail markers that standard travel apps miss.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '2.25rem',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              <div
-                style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '14px',
-                  backgroundColor: 'rgba(216, 243, 220, 0.15)',
-                  color: '#D8F3DC',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '1.5rem',
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                }}
-              >
-                03
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.35rem',
-                  marginBottom: '0.75rem',
-                  color: '#FFFFFF',
-                }}
-              >
-                Protect & Share Responsibly
-              </h3>
-              <p style={{ color: '#B0C2B8', fontSize: '0.9375rem', lineHeight: 1.65 }}>
-                Help safeguard delicate natural habitats and community sacred spots by following Leave No Trace ethics and responsible sharing guidelines.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Future 3D World Teaser (Non-interactive informative preview per Section 8) */}
-      <section style={{ padding: '4.5rem 0', backgroundColor: 'var(--bg-surface-subtle)' }}>
-        <div className="container">
-          <div
-            style={{
-              backgroundColor: 'var(--bg-surface)',
-              borderRadius: 'var(--radius-xl)',
-              border: '1px solid var(--color-border)',
-              padding: '3rem',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '2.5rem',
+              gap: '3.5rem',
               alignItems: 'center',
-              boxShadow: 'var(--shadow-sm)',
             }}
           >
-            <div>
+            {/* Left Column: Asymmetric Polaroid Composition */}
+            <div style={{ position: 'relative', minHeight: '380px' }}>
               <div
+                className="polaroid-card tape-top-left"
+                style={{
+                  position: 'absolute',
+                  top: '0',
+                  left: '10px',
+                  width: '260px',
+                  transform: 'rotate(-4deg)',
+                  zIndex: 2,
+                }}
+              >
+                <div style={{ width: '100%', height: '180px', overflow: 'hidden' }}>
+                  <img
+                    src="https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=600&q=80"
+                    alt="Canyon pool"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                <div style={{ fontFamily: 'var(--font-handwritten)', fontSize: '1.25rem', marginTop: '0.5rem', textAlign: 'center' }}>
+                  "Morning dip in Soča River"
+                </div>
+              </div>
+
+              <div
+                className="polaroid-card tape-top-right"
+                style={{
+                  position: 'absolute',
+                  bottom: '10px',
+                  right: '20px',
+                  width: '270px',
+                  transform: 'rotate(5deg)',
+                  zIndex: 3,
+                }}
+              >
+                <div style={{ width: '100%', height: '190px', overflow: 'hidden' }}>
+                  <img
+                    src="https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=600&q=80"
+                    alt="Meteora summit"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+                <div style={{ fontFamily: 'var(--font-handwritten)', fontSize: '1.25rem', marginTop: '0.5rem', textAlign: 'center' }}>
+                  "Monastery stairs at dusk"
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Editorial Text */}
+            <div>
+              <div className="section-eyebrow">
+                <Feather size={14} />
+                <span>The Explorer's Manifesto</span>
+              </div>
+              <h2
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: '2.4rem',
+                  color: 'var(--color-forest)',
+                  lineHeight: 1.25,
+                  marginBottom: '1.25rem',
+                }}
+              >
+                Travel is richer when shared with reverence.
+              </h2>
+              <p
+                style={{
+                  fontSize: '1.05rem',
+                  lineHeight: 1.75,
+                  color: 'var(--color-charcoal)',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                HiddenAtlas was created for wanderers who seek authenticity over crowded checklists.
+                Every pin on our map includes real geographic coordinates, respectful access notes,
+                and personal travel stories chronicled by the people who stood there.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9375rem', color: 'var(--color-forest)' }}>
+                  <CheckCircle2 size={18} color="var(--color-forest)" />
+                  <span><strong>Leave No Trace:</strong> Preserve delicate ecosystems and respect local communities.</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9375rem', color: 'var(--color-forest)' }}>
+                  <CheckCircle2 size={18} color="var(--color-forest)" />
+                  <span><strong>Verified Coordinates:</strong> Accurate latitude and longitude for responsible route planning.</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9375rem', color: 'var(--color-forest)' }}>
+                  <CheckCircle2 size={18} color="var(--color-forest)" />
+                  <span><strong>Community Scrapbook:</strong> Genuine photographs and firsthand travel moments.</span>
+                </div>
+              </div>
+
+              <Link to="/add">
+                <Button variant="primary" size="lg" icon={<PlusCircle size={18} />}>
+                  Contribute Your Discovery
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Famous Landmarks Section */}
+      {trendingPlaces.length > 0 && (
+        <section style={{ padding: '5.5rem 0', backgroundColor: 'var(--color-parchment-light)', borderTop: '1px solid var(--color-border)' }}>
+          <div className="container">
+            <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div className="section-eyebrow">
+                  <Flame size={14} />
+                  <span>Historic Monoliths & Heritage</span>
+                </div>
+                <h2 className="section-title">Notable Expeditions</h2>
+                <p className="section-subtitle">
+                  Historic citadels, coastal monuments, and iconic destinations celebrated worldwide.
+                </p>
+              </div>
+              <Link
+                to="/explore?type=famous-attraction"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.4rem',
-                  fontSize: '0.75rem',
                   fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  color: 'var(--color-primary-light)',
-                  backgroundColor: 'var(--color-primary-subtle)',
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: 'var(--radius-full)',
-                  marginBottom: '1rem',
+                  color: 'var(--color-forest)',
+                  fontSize: '0.9375rem',
                 }}
               >
-                <Globe size={14} />
-                <span>Phase 2 Vision Preview</span>
-              </div>
-              <h3
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '2rem',
-                  color: 'var(--color-primary)',
-                  marginBottom: '1rem',
-                  lineHeight: 1.25,
-                }}
-              >
-                The 3D World Atlas is Coming Soon
-              </h3>
-              <p
-                style={{
-                  fontSize: '0.95rem',
-                  color: 'var(--color-text-secondary)',
-                  lineHeight: 1.65,
-                  marginBottom: '1.5rem',
-                }}
-              >
-                Our long-term architectural vision will project all verified GPS coordinates directly onto an interactive 3D digital globe. Destinations you discover or submit today are already stored with verified coordinates ready for the 3D phase.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
-                <CheckCircle size={16} color="var(--color-primary-light)" />
-                <span>Domain models are pre-structured with verified latitude and longitude values</span>
-              </div>
+                <span>View all landmarks</span>
+                <ArrowRight size={16} />
+              </Link>
             </div>
 
             <div
               style={{
-                backgroundColor: '#16281F',
-                borderRadius: 'var(--radius-lg)',
-                padding: '2.5rem 2rem',
-                color: '#FFFFFF',
-                textAlign: 'center',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '2rem',
               }}
             >
-              <div
-                style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(45, 106, 79, 0.5)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.25rem',
-                  color: '#D8F3DC',
-                }}
-              >
-                <Globe size={32} />
-              </div>
-              <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
-                Spatial Exploration
-              </h4>
-              <p style={{ fontSize: '0.8125rem', color: '#B0C2B8', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-                Under development for a future release. Current focus: Clean Architecture, high-contrast UI, robust filtering, and community submissions.
-              </p>
-              <span
-                style={{
-                  display: 'inline-block',
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  color: '#A2D2B5',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  padding: '0.35rem 0.85rem',
-                  borderRadius: 'var(--radius-full)',
-                }}
-              >
-                Future Phase
-              </span>
+              {trendingPlaces.map((place) => (
+                <PlaceCard key={place.id} place={place} />
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
+      {/* Custom Styles */}
       <style>{`
         .category-card:hover {
           transform: translateY(-4px);
           box-shadow: var(--shadow-md);
-          border-color: var(--color-primary-light);
+          border-color: var(--color-forest-light);
         }
       `}</style>
     </div>

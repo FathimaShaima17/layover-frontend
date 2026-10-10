@@ -8,6 +8,8 @@ import { SearchPlacesUseCase } from '../../application/use-cases/SearchPlaces';
 import { SubmitPlaceUseCase } from '../../application/use-cases/SubmitPlace';
 import { SubmitPlaceFormDto } from '../../application/dto/PlaceDto';
 
+import { mockPlaceRepository } from '../../infrastructure/repositories/MockPlaceRepository';
+
 interface PlacesContextValue {
   places: Place[];
   isLoading: boolean;
@@ -39,10 +41,21 @@ export const PlacesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setError(null);
     try {
       const data = await getPlacesUseCase.execute();
-      setPlaces(data);
+      if (data && data.length > 0) {
+        setPlaces(data);
+      } else {
+        const fallback = await mockPlaceRepository.getAll();
+        setPlaces(fallback);
+      }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load destinations';
-      setError(message);
+      console.info('[HiddenAtlas] Backend unavailable, loading local discoveries dataset:', err);
+      try {
+        const fallback = await mockPlaceRepository.getAll();
+        setPlaces(fallback);
+      } catch (fallbackErr) {
+        const message = fallbackErr instanceof Error ? fallbackErr.message : 'Failed to load destinations';
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }

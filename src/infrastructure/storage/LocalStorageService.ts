@@ -60,27 +60,6 @@ export class LocalStorageService implements ISavedPlacesStorage {
   }
 
   // Prototype User Profile persistence
-  getUserProfile(): UserProfile {
-    const defaultProfile: UserProfile = {
-      id: 'user-01',
-      name: 'Elena Rostova',
-      email: 'elena.rostova@explorer.org',
-      bio: 'Alpine wanderer, photographer, and chronicler of forgotten mountain chapels and coastal coves.',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      role: 'Master Explorer (Level 4)',
-      contributionsCount: 14,
-    };
-
-    if (!this.isAvailable()) return defaultProfile;
-    try {
-      const raw = window.localStorage.getItem(USER_PROFILE_KEY);
-      if (!raw) return defaultProfile;
-      return JSON.parse(raw);
-    } catch {
-      return defaultProfile;
-    }
-  }
-
   saveUserProfile(profile: UserProfile): void {
     if (!this.isAvailable()) return;
     try {

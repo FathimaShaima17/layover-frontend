@@ -7,12 +7,12 @@ export const Footer: React.FC = () => {
   return (
     <footer
       style={{
-        backgroundColor: '#16281F',
-        color: '#E8EFEA',
+        backgroundColor: 'var(--color-charcoal)',
+        color: '#EFECE6',
         paddingTop: '4.5rem',
         paddingBottom: '3rem',
         marginTop: '6rem',
-        borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        borderTop: '3px solid var(--color-earth)',
       }}
     >
       <div className="container">
@@ -30,16 +30,17 @@ export const Footer: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.65rem',
+                gap: '0.75rem',
                 marginBottom: '1.25rem',
               }}
             >
               <div
                 style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '9px',
-                  backgroundColor: 'var(--color-primary-light)',
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--color-forest)',
+                  border: '1px solid var(--color-sage)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -48,28 +49,41 @@ export const Footer: React.FC = () => {
               >
                 <Compass size={20} />
               </div>
-              <span
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.4rem',
-                  fontWeight: 700,
-                  color: '#FFFFFF',
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                HiddenAtlas
-              </span>
+              <div>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '1.45rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF',
+                    letterSpacing: '-0.02em',
+                  }}
+                >
+                  HiddenAtlas
+                </span>
+                <div
+                  style={{
+                    fontSize: '0.6875rem',
+                    fontWeight: 700,
+                    color: 'var(--color-sand)',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Expedition Journal
+                </div>
+              </div>
             </div>
             <p
               style={{
                 fontSize: '0.9rem',
-                lineHeight: 1.65,
-                color: '#B0C2B8',
+                lineHeight: 1.7,
+                color: '#C8C4BA',
                 marginBottom: '1.25rem',
               }}
             >
-              A community-curated travel atlas dedicated to discovering secret gorges,
-              ancient shrines, secluded coves, and remarkable sights beyond the tourist trails.
+              A community-curated travel journal chronicling secret waterfalls, alpine tarns, secluded coves,
+              and authentic stories beyond the crowded tourist trails.
             </p>
             <div
               style={{
@@ -77,14 +91,15 @@ export const Footer: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.45rem',
                 fontSize: '0.8125rem',
-                color: '#A2D2B5',
-                backgroundColor: 'rgba(45, 106, 79, 0.35)',
+                color: 'var(--color-sand)',
+                backgroundColor: 'rgba(197, 178, 140, 0.12)',
+                border: '1px solid rgba(197, 178, 140, 0.25)',
                 padding: '0.4rem 0.8rem',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 'var(--radius-sm)',
               }}
             >
               <Globe size={14} />
-              <span>3D Geographic World — Phase 2 In Progress</span>
+              <span>Shared 3D Geographic Canvas Active</span>
             </div>
           </div>
 
@@ -92,15 +107,15 @@ export const Footer: React.FC = () => {
           <div>
             <h4
               style={{
-                fontSize: '0.9375rem',
+                fontSize: '0.875rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: '#FFFFFF',
+                letterSpacing: '0.1em',
+                color: 'var(--color-sand)',
                 marginBottom: '1.2rem',
               }}
             >
-              Explore
+              Field Navigation
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               <li>
@@ -108,11 +123,11 @@ export const Footer: React.FC = () => {
                   to="/explore"
                   style={{
                     fontSize: '0.875rem',
-                    color: '#B0C2B8',
+                    color: '#C8C4BA',
                     transition: 'color var(--transition-fast)',
                   }}
                 >
-                  All Destinations
+                  Curated Destination Atlas
                 </Link>
               </li>
               <li>
@@ -120,7 +135,7 @@ export const Footer: React.FC = () => {
                   to="/explore?type=hidden-gem"
                   style={{
                     fontSize: '0.875rem',
-                    color: '#B0C2B8',
+                    color: '#C8C4BA',
                     transition: 'color var(--transition-fast)',
                   }}
                 >
@@ -132,11 +147,11 @@ export const Footer: React.FC = () => {
                   to="/explore?type=famous-attraction"
                   style={{
                     fontSize: '0.875rem',
-                    color: '#B0C2B8',
+                    color: '#C8C4BA',
                     transition: 'color var(--transition-fast)',
                   }}
                 >
-                  Famous Landmarks
+                  Historic Monoliths & Landmarks
                 </Link>
               </li>
               <li>
@@ -144,11 +159,11 @@ export const Footer: React.FC = () => {
                   to="/saved"
                   style={{
                     fontSize: '0.875rem',
-                    color: '#B0C2B8',
+                    color: '#C8C4BA',
                     transition: 'color var(--transition-fast)',
                   }}
                 >
-                  My Saved Atlas
+                  My Saved Discoveries
                 </Link>
               </li>
               <li>
@@ -156,7 +171,7 @@ export const Footer: React.FC = () => {
                   to="/add"
                   style={{
                     fontSize: '0.875rem',
-                    color: '#B0C2B8',
+                    color: '#C8C4BA',
                     transition: 'color var(--transition-fast)',
                   }}
                 >
@@ -170,15 +185,15 @@ export const Footer: React.FC = () => {
           <div>
             <h4
               style={{
-                fontSize: '0.9375rem',
+                fontSize: '0.875rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: '#FFFFFF',
+                letterSpacing: '0.1em',
+                color: 'var(--color-sand)',
                 marginBottom: '1.2rem',
               }}
             >
-              Categories
+              Expedition Themes
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {CATEGORIES.slice(0, 5).map((cat) => (
@@ -187,7 +202,7 @@ export const Footer: React.FC = () => {
                     to={`/explore?category=${cat.key}`}
                     style={{
                       fontSize: '0.875rem',
-                      color: '#B0C2B8',
+                      color: '#C8C4BA',
                       transition: 'color var(--transition-fast)',
                     }}
                   >
@@ -202,26 +217,25 @@ export const Footer: React.FC = () => {
           <div>
             <h4
               style={{
-                fontSize: '0.9375rem',
+                fontSize: '0.875rem',
                 fontWeight: 700,
                 textTransform: 'uppercase',
-                letterSpacing: '0.08em',
-                color: '#FFFFFF',
+                letterSpacing: '0.1em',
+                color: 'var(--color-sand)',
                 marginBottom: '1.2rem',
               }}
             >
-              Responsible Travel
+              Explorer's Creed
             </h4>
             <p
               style={{
                 fontSize: '0.85rem',
-                lineHeight: 1.6,
-                color: '#B0C2B8',
+                lineHeight: 1.65,
+                color: '#C8C4BA',
                 marginBottom: '1rem',
               }}
             >
-              Protect sacred sites and pristine habitats. HiddenAtlas promotes Leave No Trace principles,
-              verified trail safety, and respecting local community traditions.
+              Take only photographs, leave only footprints. HiddenAtlas upholds Leave No Trace ethics, verified coordinates, and stewardship of fragile ecosystems.
             </p>
             <div
               style={{
@@ -229,7 +243,7 @@ export const Footer: React.FC = () => {
                 alignItems: 'center',
                 gap: '0.5rem',
                 fontSize: '0.8125rem',
-                color: '#E9D8A6',
+                color: 'var(--color-sand)',
               }}
             >
               <Shield size={16} />
@@ -249,16 +263,16 @@ export const Footer: React.FC = () => {
             justifyContent: 'space-between',
             gap: '1rem',
             fontSize: '0.8125rem',
-            color: '#899E92',
+            color: '#9C988D',
           }}
         >
           <div>
-            © {new Date().getFullYear()} HiddenAtlas. Clean Architecture React + TypeScript Platform.
+            © {new Date().getFullYear()} HiddenAtlas — Expedition Journal & Community Travel Scrapbook.
           </div>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <span>Clean Architecture</span>
-            <span>Domain Driven Design</span>
             <span>TypeScript Strict</span>
+            <span>Leave No Trace</span>
           </div>
         </div>
       </div>
