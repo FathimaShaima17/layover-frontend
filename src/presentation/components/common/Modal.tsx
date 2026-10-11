@@ -56,17 +56,19 @@ export const Modal: React.FC<ModalProps> = ({
       }}
     >
       <div
+        className="form-polaroid tape-top-center"
         style={{
           width: '100%',
           maxWidth,
-          backgroundColor: 'var(--bg-surface)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: 'var(--shadow-xl)',
-          border: '1px solid var(--color-border)',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '4px',
+          boxShadow: '0 24px 64px rgba(45, 42, 35, 0.24), 0 4px 16px rgba(45, 42, 35, 0.1)',
+          border: '1px solid rgba(221, 212, 192, 0.8)',
           overflow: 'hidden',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
+          position: 'relative',
         }}
       >
         <div

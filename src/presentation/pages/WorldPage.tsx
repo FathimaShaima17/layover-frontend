@@ -1,230 +1,386 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import {
-  LayoutGrid,
-  Route,
-  Compass,
-  AlertCircle,
-  RefreshCw,
-  PlusCircle,
-} from 'lucide-react';
-import { Place, PlaceCategory, PlaceType } from '../../domain/entities/Place';
+import React, { useState, useCallback, Suspense, useMemo, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Globe, PlusCircle, Loader } from 'lucide-react';
+import { Place } from '../../domain/entities/Place';
 import { usePlaces } from '../context/PlacesContext';
-import { useToast } from '../context/ToastContext';
-import { WorldMap, MapHandle } from '../components/world/WorldMap';
-import { WorldControls } from '../components/world/WorldControls';
-import { PlacePreviewPanel } from '../components/world/PlacePreviewPanel';
-import { DiscoveryTrailPanel } from '../components/world/DiscoveryTrailPanel';
+import { WorldScene } from '../components/world/WorldScene';
+import { WorldInfoPanel } from '../components/world/WorldInfoPanel';
+import { WorldSidebar } from '../components/world/WorldSidebar';
+import { useGeoLocation } from '../../shared/hooks/useGeoLocation';
+import { haversineKm } from '../../shared/utils/geo';
+
+// ─── Kozhikode Beach Demo Places ─────────────────────────────────────────────
+// Fictional sample destinations near Kozhikode Beach, Kerala, India.
+// All coordinates are plausible but these places are demo data only.
+
+export const KOZHIKODE_DEMO_PLACES: Place[] = [
+  {
+    id: 'kzd-01',
+    name: 'Kappad Beach',
+    description:
+      'A historic beach where Vasco da Gama landed in 1498, flanked by ancient laterite rocks and golden sand. Local fishing boats still dot the shoreline at dawn.',
+    category: 'beaches',
+    type: 'hidden-gem',
+    location: 'Kappad, Kozhikode, Kerala',
+    coordinates: { latitude: 11.3086, longitude: 75.7246 },
+    images: [
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    ],
+    tags: ['historic-beach', 'vasco-da-gama', 'fishing', 'kozhikode'],
+    status: 'approved',
+    createdAt: new Date().toISOString(),
+    rating: 4.6,
+    reviewsCount: 31,
+  },
+  {
+    id: 'kzd-02',
+    name: 'Thusharagiri Waterfalls',
+    description:
+      'Three-tiered waterfalls cascading through dense forest in the Wayanad foothills. Misty gorges, trekking paths, and emerald pools await at each level.',
+    category: 'nature',
+    type: 'hidden-gem',
+    location: 'Thusharagiri, Kozhikode District',
+    coordinates: { latitude: 11.4012, longitude: 75.9425 },
+    images: [
+      'https://images.unsplash.com/photo-1511497584788-87676104235f?auto=format&fit=crop&w=800&q=80',
+    ],
+    tags: ['waterfall', 'forest-trek', 'three-tier', 'kozhikode'],
+    status: 'approved',
+    createdAt: new Date().toISOString(),
+    rating: 4.8,
+    reviewsCount: 47,
+  },
+  {
+    id: 'kzd-03',
+    name: 'Payyoli Beach Viewpoint',
+    description:
+      'A quiet crescent of golden sand north of Kozhikode where Olive Ridley turtles nest every winter. The view of the Arabian Sea at sunset is unmatched.',
+    category: 'beaches',
+    type: 'hidden-gem',
+    location: 'Payyoli, Kozhikode District',
+    coordinates: { latitude: 11.5221, longitude: 75.6407 },
+    images: [
+      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    ],
+    tags: ['turtle-nesting', 'quiet-beach', 'sunset', 'kozhikode'],
+    status: 'approved',
+    createdAt: new Date().toISOString(),
+    rating: 4.5,
+    reviewsCount: 22,
+  },
+  {
+    id: 'kzd-04',
+    name: 'Kadalundi Bird Sanctuary',
+    description:
+      'A cluster of tiny islands at the Kadalundi River estuary. Over 70 migratory bird species arrive here from Siberia and Europe between November and March.',
+    category: 'nature',
+    type: 'hidden-gem',
+    location: 'Kadalundi, Kozhikode District',
+    coordinates: { latitude: 11.1356, longitude: 75.8282 },
+    images: [
+      'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80',
+    ],
+    tags: ['bird-sanctuary', 'migratory-birds', 'estuary', 'kozhikode'],
+    status: 'approved',
+    createdAt: new Date().toISOString(),
+    rating: 4.7,
+    reviewsCount: 39,
+  },
+  {
+    id: 'kzd-05',
+    name: 'Tali Shiva Temple',
+    description:
+      'A 14th-century temple built by the Zamorins of Calicut, featuring Kerala-style wooden carvings and a serene pond inside stone-walled courtyards.',
+    category: 'history',
+    type: 'hidden-gem',
+    location: 'Tali, Kozhikode City',
+    coordinates: { latitude: 11.2530, longitude: 75.7707 },
+    images: [
+      'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=800&q=80',
+    ],
+    tags: ['temple', 'zamorin', 'ancient', 'kozhikode'],
+    status: 'approved',
+    createdAt: new Date().toISOString(),
+    rating: 4.7,
+    reviewsCount: 28,
+  },
+  {
+    id: 'kzd-06',
+    name: 'Sweet Meat Street (S.M. Street)',
+    description:
+      'The legendary Mittayi Theruvu of old Calicut – 300 metres of halwa shops, spice traders, and old-fashioned Kerala bakeries. The scent of ghee and cardamom fills the air.',
+    category: 'food',
+    type: 'hidden-gem',
+    location: 'S.M. Street, Kozhikode City',
+    coordinates: { latitude: 11.2525, longitude: 75.7757 },
+    images: [
+      'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80',
+    ],
+    tags: ['street-food', 'halwa', 'spice-market', 'kozhikode'],
+    status: 'approved',
+    createdAt: new Date().toISOString(),
+    rating: 4.9,
+    reviewsCount: 83,
+  },
+];
+
+// ─── Empty world overlay ──────────────────────────────────────────────────────
+
+const EmptyWorldOverlay: React.FC = () => (
+  <div
+    style={{
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -60%)',
+      textAlign: 'center',
+      zIndex: 20,
+      pointerEvents: 'none',
+      userSelect: 'none',
+    }}
+  >
+    <div
+      style={{
+        width: '64px',
+        height: '64px',
+        borderRadius: '50%',
+        backgroundColor: 'rgba(45, 106, 79, 0.18)',
+        backdropFilter: 'blur(4px)',
+        border: '1.5px solid rgba(82, 183, 136, 0.35)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 1.2rem',
+      }}
+    >
+      <Globe size={28} color="#52B788" />
+    </div>
+    <h2
+      style={{
+        fontFamily: 'var(--font-serif)',
+        fontSize: 'clamp(1.5rem, 3vw, 2.2rem)',
+        fontWeight: 700,
+        color: '#FFFFFF',
+        textShadow: '0 2px 12px rgba(0,0,0,0.4)',
+        marginBottom: '0.5rem',
+        lineHeight: 1.2,
+      }}
+    >
+      Your world starts here.
+    </h2>
+    <p
+      style={{
+        fontSize: 'clamp(0.85rem, 1.8vw, 1rem)',
+        color: 'rgba(255,255,255,0.82)',
+        textShadow: '0 1px 6px rgba(0,0,0,0.4)',
+        maxWidth: '340px',
+        lineHeight: 1.6,
+        marginBottom: '1.5rem',
+        fontFamily: 'var(--font-sans)',
+      }}
+    >
+      Discover the places people add to HiddenAtlas.<br />
+      Every contribution becomes part of this shared world.
+    </p>
+    <div style={{ pointerEvents: 'auto' }}>
+      <Link
+        to="/add"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.7rem 1.5rem',
+          backgroundColor: 'var(--color-forest)',
+          color: '#FFFFFF',
+          borderRadius: '12px',
+          textDecoration: 'none',
+          fontSize: '0.9rem',
+          fontWeight: 700,
+          fontFamily: 'var(--font-nesiota)',
+          boxShadow: '0 4px 18px rgba(45,106,79,0.45)',
+          border: '1px solid var(--color-forest-dark)',
+        }}
+      >
+        <PlusCircle size={16} />
+        Add a Place
+      </Link>
+    </div>
+  </div>
+);
+
+// ─── Loading overlay ──────────────────────────────────────────────────────────
+
+const LoadingOverlay: React.FC = () => (
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      backgroundColor: '#1C2B22',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '1rem',
+      zIndex: 50,
+      color: '#FFFFFF',
+    }}
+  >
+    <div
+      style={{
+        width: '48px',
+        height: '48px',
+        borderRadius: '50%',
+        border: '3px solid rgba(255,255,255,0.15)',
+        borderTopColor: '#52B788',
+        animation: 'worldSpin 1s linear infinite',
+      }}
+    />
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.15rem', fontWeight: 700 }}>
+        Entering 3D World…
+      </div>
+      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.3rem', fontFamily: 'var(--font-nesiota)' }}>
+        Building the landscape
+      </div>
+    </div>
+    <style>{`
+      @keyframes worldSpin { to { transform: rotate(360deg); } }
+    `}</style>
+  </div>
+);
+
+// ─── WebGL check ─────────────────────────────────────────────────────────────
+
+function isWebGLSupported(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
+}
+
+// ─── WorldPage ────────────────────────────────────────────────────────────────
 
 export const WorldPage: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { places, isLoading, error, refreshPlaces } = usePlaces();
-  const { showToast } = useToast();
+  const { places, isLoading } = usePlaces();
+  const location = useGeoLocation();
 
-  const mapRef = useRef<MapHandle>(null);
+  const routerLocation = useLocation();
+  const routeState = routerLocation.state as { selectedPlaceId?: string } | undefined;
 
-  // Read initial filter values from URL search params
-  const initialQuery = searchParams.get('q') || '';
-  const initialCategory = (searchParams.get('category') as PlaceCategory) || 'all';
-  const initialType = (searchParams.get('type') as PlaceType) || 'all';
-
-  const [searchQuery, setSearchQuery] = useState<string>(initialQuery);
-  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | 'all'>(initialCategory);
-  const [selectedType, setSelectedType] = useState<PlaceType | 'all'>(initialType);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [is3DMode, setIs3DMode] = useState<boolean>(true);
-  const [isLocating, setIsLocating] = useState<boolean>(false);
+  const [extraPlaces, setExtraPlaces] = useState<Place[]>([]);
+  const [demoLoaded, setDemoLoaded] = useState(false);
+  const [emptyMode, setEmptyMode] = useState(false);
+  const [nearbyRadiusKm, setNearbyRadiusKm] = useState(10);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
-  // Discovery Trail builder state
-  const [trailStops, setTrailStops] = useState<Place[]>([]);
-  const [isTrailPanelOpen, setIsTrailPanelOpen] = useState<boolean>(false);
+  // Merge context places with any locally-added extra places and default Kozhikode demo destinations
+  const allPlaces = useMemo(() => {
+    if (emptyMode) return [];
+    const base = places.length > 0 ? places : KOZHIKODE_DEMO_PLACES;
+    const baseIds = new Set(base.map((p) => p.id));
+    const withKozhikode = [
+      ...base,
+      ...KOZHIKODE_DEMO_PLACES.filter(
+        (p) => !baseIds.has(p.id) && !base.some((b) => b.name.toLowerCase() === p.name.toLowerCase())
+      ),
+    ];
+    // De-duplicate by id; extra places (newly submitted) take priority
+    const extraIds = new Set(extraPlaces.map((p) => p.id));
+    return [...extraPlaces, ...withKozhikode.filter((p) => !extraIds.has(p.id))];
+  }, [emptyMode, places, extraPlaces]);
 
-  // Sync state if URL changes externally
-  useEffect(() => {
-    const qParam = searchParams.get('q') || '';
-    const catParam = (searchParams.get('category') as PlaceCategory) || 'all';
-    const typeParam = (searchParams.get('type') as PlaceType) || 'all';
+  const approvedPlaces = useMemo(
+    () => allPlaces.filter((p) => p.status === 'approved'),
+    [allPlaces]
+  );
 
-    setSearchQuery(qParam);
-    setSelectedCategory(catParam);
-    setSelectedType(typeParam);
-  }, [searchParams]);
-
-  // Update URL params
-  const updateParams = (
-    newQuery: string,
-    newCat: PlaceCategory | 'all',
-    newType: PlaceType | 'all'
-  ) => {
-    const params = new URLSearchParams();
-    if (newQuery) params.set('q', newQuery);
-    if (newCat !== 'all') params.set('category', newCat);
-    if (newType !== 'all') params.set('type', newType);
-    setSearchParams(params, { replace: true });
-  };
-
-  const handleSearchChange = (q: string) => {
-    setSearchQuery(q);
-    updateParams(q, selectedCategory, selectedType);
-  };
-
-  const handleCategoryChange = (cat: PlaceCategory | 'all') => {
-    setSelectedCategory(cat);
-    updateParams(searchQuery, cat, selectedType);
-  };
-
-  const handleTypeChange = (type: PlaceType | 'all') => {
-    setSelectedType(type);
-    updateParams(searchQuery, selectedCategory, type);
-  };
-
-  const handleClearFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('all');
-    setSelectedType('all');
-    setSearchParams({}, { replace: true });
-  };
-
-  const hasActiveFilters =
-    searchQuery.trim() !== '' || selectedCategory !== 'all' || selectedType !== 'all';
-
-  // Filter approved places with valid coordinates
-  const filteredPlaces = useMemo(() => {
-    return places.filter((p) => {
-      // Must have valid coordinates to render in geographic world
+  // Places within radius of active location
+  const nearbyPlaces = useMemo(() => {
+    return approvedPlaces.filter((p) => {
       if (!p.coordinates) return false;
-
-      // Filter by type
-      if (selectedType !== 'all' && p.type !== selectedType) return false;
-
-      // Filter by category
-      if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
-
-      // Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase().trim();
-        const matchesName = p.name.toLowerCase().includes(q);
-        const matchesLoc = p.location.toLowerCase().includes(q);
-        const matchesDesc = p.description.toLowerCase().includes(q);
-        const matchesTags = p.tags.some((t) => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesLoc && !matchesDesc && !matchesTags) return false;
-      }
-
-      return true;
+      const dist = haversineKm(location.coords, p.coordinates);
+      return dist <= nearbyRadiusKm;
     });
-  }, [places, searchQuery, selectedCategory, selectedType]);
+  }, [approvedPlaces, location.coords, nearbyRadiusKm]);
 
-  // Auto-fit bounds on initial destination load
-  const hasAutoFitted = useRef(false);
+  // When navigated to with a specific submitted place, focus and open its info panel
   useEffect(() => {
-    if (filteredPlaces.length > 0 && !hasAutoFitted.current) {
-      hasAutoFitted.current = true;
-      const timer = setTimeout(() => {
-        mapRef.current?.fitBounds(filteredPlaces);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [filteredPlaces]);
-
-  // Marker click handler
-  const handleMarkerClick = useCallback((place: Place) => {
-    setSelectedPlace(place);
-    if (place.coordinates && mapRef.current) {
-      mapRef.current.flyTo(
-        place.coordinates.longitude,
-        place.coordinates.latitude,
-        13,
-        55
-      );
-    }
-  }, []);
-
-  // Map blank canvas click
-  const handleMapClick = useCallback(() => {
-    setSelectedPlace(null);
-  }, []);
-
-  // Reset view
-  const handleResetView = () => {
-    setSelectedPlace(null);
-    mapRef.current?.resetView();
-  };
-
-  // Fit bounds to all matching places
-  const handleFitBounds = () => {
-    if (filteredPlaces.length > 0) {
-      mapRef.current?.fitBounds(filteredPlaces);
-    } else {
-      showToast('No destinations match current filters to fit bounds.', 'info');
-    }
-  };
-
-  // Toggle 3D perspective
-  const handleToggle3D = () => {
-    const nextMode = !is3DMode;
-    setIs3DMode(nextMode);
-    mapRef.current?.toggle3D(nextMode);
-    showToast(nextMode ? '3D Perspective Enabled (60° Tilt)' : '2D Top-down View Enabled', 'info');
-  };
-
-  // Browser Geolocation
-  const handleLocateUser = () => {
-    if (!navigator.geolocation) {
-      showToast('Geolocation is not supported by your browser.', 'error');
-      return;
-    }
-
-    setIsLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setIsLocating(false);
-        const { longitude, latitude } = pos.coords;
-        mapRef.current?.flyTo(longitude, latitude, 12, is3DMode ? 55 : 0);
-        showToast('Flew to your geographic location.', 'success');
-      },
-      (err) => {
-        setIsLocating(false);
-        if (err.code === err.PERMISSION_DENIED) {
-          showToast('Location permission denied. Please enable in your browser.', 'warning');
-        } else {
-          showToast('Unable to retrieve location: ' + err.message, 'error');
-        }
-      },
-      { timeout: 10000, enableHighAccuracy: true }
-    );
-  };
-
-  // Discovery Trail management
-  const handleToggleTrail = (place: Place) => {
-    setTrailStops((prev) => {
-      const exists = prev.some((p) => p.id === place.id);
-      if (exists) {
-        showToast(`Removed "${place.name}" from your discovery trail.`, 'info');
-        return prev.filter((p) => p.id !== place.id);
-      } else {
-        showToast(`Added "${place.name}" to your discovery trail!`, 'success');
-        setIsTrailPanelOpen(true);
-        return [...prev, place];
+    if (routeState?.selectedPlaceId && approvedPlaces.length > 0) {
+      const found = approvedPlaces.find((p) => p.id === routeState.selectedPlaceId);
+      if (found) {
+        setSelectedPlace(found);
       }
-    });
-  };
-
-  const handleRemoveTrailStop = (placeId: string) => {
-    setTrailStops((prev) => prev.filter((p) => p.id !== placeId));
-  };
-
-  const handleClearTrail = () => {
-    setTrailStops([]);
-    setIsTrailPanelOpen(false);
-    showToast('Discovery trail cleared.', 'info');
-  };
-
-  const handleSelectTrailStop = (place: Place) => {
-    setSelectedPlace(place);
-    if (place.coordinates) {
-      mapRef.current?.flyTo(place.coordinates.longitude, place.coordinates.latitude, 14, 55);
     }
-  };
+  }, [routeState?.selectedPlaceId, approvedPlaces]);
+
+  const handleSelectPlace = useCallback((place: Place | null) => {
+    setSelectedPlace(place);
+  }, []);
+
+  const handleResetView = useCallback(() => {
+    setSelectedPlace(null);
+  }, []);
+
+  const handleLoadDemo = useCallback(() => {
+    setExtraPlaces(KOZHIKODE_DEMO_PLACES);
+    setDemoLoaded(true);
+  }, []);
+
+  const handleClearToEmpty = useCallback(() => {
+    setEmptyMode(true);
+    setExtraPlaces([]);
+    setDemoLoaded(false);
+    setSelectedPlace(null);
+  }, []);
+
+  const handleRestoreAll = useCallback(() => {
+    setEmptyMode(false);
+    setSelectedPlace(null);
+  }, []);
+
+  // When a new place is submitted via the form it is added to context;
+  // we also inject it into extraPlaces so it shows immediately in the world.
+  // The PlacesContext already pushes it to `places`, but status is 'pending'.
+  // For demo purposes, auto-approve locally-submitted places so they appear in 3D.
+  const handleLocalSubmit = useCallback((place: Place) => {
+    setExtraPlaces((prev) => {
+      if (prev.some((p) => p.id === place.id)) return prev;
+      return [{ ...place, status: 'approved' }, ...prev];
+    });
+  }, []);
+
+  // Check WebGL
+  if (!isWebGLSupported()) {
+    return (
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem',
+          textAlign: 'center',
+          backgroundColor: 'var(--bg-app)',
+        }}
+      >
+        <Globe size={48} color="var(--color-charcoal-light)" style={{ marginBottom: '1.5rem' }} />
+        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', marginBottom: '0.75rem' }}>
+          WebGL Not Available
+        </h2>
+        <p style={{ maxWidth: '440px', color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
+          The 3D World requires WebGL support. Please use a modern browser like Chrome, Firefox, or
+          Edge, and ensure hardware acceleration is enabled.
+        </p>
+        <Link to="/explore" className="btn btn-primary" style={{ marginTop: '1.5rem', textDecoration: 'none' }}>
+          Explore 2D Catalog Instead
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -235,233 +391,82 @@ export const WorldPage: React.FC = () => {
         flex: 1,
         minHeight: '500px',
         overflow: 'hidden',
-        backgroundColor: '#0F172A',
+        backgroundColor: '#1C2B22',
       }}
     >
-      {/* Top right HUD navigation bar */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          right: '1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          zIndex: 20,
-        }}
-      >
-        {/* Switch to Catalog Grid */}
-        <Link
-          to={`/explore?${searchParams.toString()}`}
-          title="Switch to 2D Catalog Grid View"
-          className="btn btn-secondary btn-sm"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(8px)',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.1)',
-            textDecoration: 'none',
-          }}
-        >
-          <LayoutGrid size={15} />
-          <span>Catalog View</span>
-        </Link>
+      {/* 3D Canvas */}
+      <Suspense fallback={<LoadingOverlay />}>
+        <WorldScene
+          places={allPlaces}
+          selectedPlace={selectedPlace}
+          onPlaceSelect={handleSelectPlace}
+          activeLocation={location.coords}
+          locationMode={location.mode}
+        />
+      </Suspense>
 
-        {/* Trail toggle button */}
-        {trailStops.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setIsTrailPanelOpen((v) => !v)}
-            title="Open Discovery Trail Planner"
-            className="btn btn-primary btn-sm"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              boxShadow: '0 4px 16px rgba(45, 106, 79, 0.35)',
-            }}
-          >
-            <Route size={15} />
-            <span>Trail ({trailStops.length})</span>
-          </button>
-        )}
+      {/* Empty world overlay (only shown when no approved places) */}
+      {!isLoading && approvedPlaces.length === 0 && <EmptyWorldOverlay />}
 
-        {/* Share a place CTA */}
-        <Link
-          to="/add"
-          className="btn btn-primary btn-sm"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            boxShadow: '0 4px 12px rgba(15, 23, 42, 0.15)',
-            textDecoration: 'none',
-          }}
-        >
-          <PlusCircle size={15} />
-          <span>Contribute</span>
-        </Link>
-      </div>
-
-      {/* Main 3D World Map canvas */}
-      <WorldMap
-        ref={mapRef}
-        places={filteredPlaces}
-        selectedPlace={selectedPlace}
-        onMarkerClick={handleMarkerClick}
-        onMapClick={handleMapClick}
-        is3DMode={is3DMode}
-      />
-
-      {/* Exploration HUD Controls (top-left) */}
-      <WorldControls
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-        selectedType={selectedType}
-        onTypeChange={handleTypeChange}
-        matchCount={filteredPlaces.length}
-        totalCount={places.length}
-        onClearFilters={handleClearFilters}
-        hasActiveFilters={hasActiveFilters}
-        onResetView={handleResetView}
-        onFitBounds={handleFitBounds}
-        onLocateUser={handleLocateUser}
-        isLocating={isLocating}
-        is3DMode={is3DMode}
-        onToggle3D={handleToggle3D}
-      />
-
-      {/* Selected Destination Preview Card (bottom-left) */}
+      {/* Place info panel */}
       {selectedPlace && (
-        <PlacePreviewPanel
+        <WorldInfoPanel
           place={selectedPlace}
-          allPlaces={places}
           onClose={() => setSelectedPlace(null)}
-          onNearbySelect={handleMarkerClick}
-          isInTrail={trailStops.some((p) => p.id === selectedPlace.id)}
-          onToggleTrail={handleToggleTrail}
-          onOpenTrailPlanner={() => setIsTrailPanelOpen(true)}
-          trailCount={trailStops.length}
+          activeLocation={location.coords}
         />
       )}
 
-      {/* Discovery Trail Panel (top-right drawer) */}
-      <DiscoveryTrailPanel
-        trailStops={trailStops}
-        onRemoveStop={handleRemoveTrailStop}
-        onClearTrail={handleClearTrail}
-        onSelectStop={handleSelectTrailStop}
-        isOpen={isTrailPanelOpen}
-        onClose={() => setIsTrailPanelOpen(false)}
+      {/* Sidebar: controls + place list */}
+      <WorldSidebar
+        places={allPlaces}
+        nearbyPlaces={nearbyPlaces}
+        selectedPlace={selectedPlace}
+        onSelectPlace={handleSelectPlace}
+        onResetView={handleResetView}
+        onLoadDemo={handleLoadDemo}
+        demoLoaded={demoLoaded}
+        isEmptyMode={emptyMode}
+        onClearToEmpty={handleClearToEmpty}
+        onRestoreAll={handleRestoreAll}
+        activeLocation={location.coords}
+        locationMode={location.mode}
+        locationRequesting={location.requesting}
+        locationError={location.error}
+        onRequestDeviceLocation={location.requestDeviceLocation}
+        onResetToDemo={location.resetToDemo}
+        nearbyRadiusKm={nearbyRadiusKm}
+        onNearbyRadiusChange={setNearbyRadiusKm}
+        categoryFilter={categoryFilter}
+        onCategoryFilterChange={setCategoryFilter}
+        onLocalSubmit={handleLocalSubmit}
       />
 
-      {/* Loading overlay */}
-      {isLoading && places.length === 0 && (
+      {/* Loading indicator while context fetches */}
+      {isLoading && (
         <div
           style={{
             position: 'absolute',
-            inset: 0,
-            backgroundColor: 'rgba(15, 23, 42, 0.75)',
+            top: '1rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            backgroundColor: 'rgba(28, 43, 34, 0.85)',
             backdropFilter: 'blur(8px)',
+            borderRadius: '999px',
+            padding: '0.35rem 1rem',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1rem',
-            color: '#FFFFFF',
+            gap: '0.5rem',
+            fontSize: '0.75rem',
+            color: '#D8F3DC',
             zIndex: 40,
+            fontFamily: 'var(--font-nesiota)',
           }}
         >
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              border: '3px solid rgba(255, 255, 255, 0.2)',
-              borderTopColor: '#52B788',
-              animation: 'spin 1s linear infinite',
-            }}
-          />
-          <div style={{ textAlign: 'center' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>
-              Entering 3D Geographic World…
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#94A3B8', margin: '0.25rem 0 0' }}>
-              Projecting community discoveries to real coordinates
-            </p>
-          </div>
+          <Loader size={13} style={{ animation: 'worldSpin 1s linear infinite' }} />
+          Loading discoveries…
         </div>
       )}
-
-      {/* Error notification banner */}
-      {error && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '1.5rem',
-            right: '1.5rem',
-            backgroundColor: 'rgba(185, 28, 28, 0.95)',
-            color: '#FFFFFF',
-            borderRadius: 'var(--radius-lg)',
-            padding: '0.75rem 1rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.65rem',
-            fontSize: '0.8125rem',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
-            zIndex: 30,
-          }}
-        >
-          <AlertCircle size={16} />
-          <span>{error}</span>
-          <button
-            type="button"
-            onClick={refreshPlaces}
-            style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              border: 'none',
-              color: '#FFFFFF',
-              borderRadius: 'var(--radius-sm)',
-              padding: '3px 8px',
-              fontSize: '0.75rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.3rem',
-            }}
-          >
-            <RefreshCw size={12} />
-            Retry
-          </button>
-        </div>
-      )}
-
-      {/* Bottom status badge */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '0.75rem',
-          right: '5rem',
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(6px)',
-          borderRadius: 'var(--radius-full)',
-          padding: '0.3rem 0.75rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.4rem',
-          fontSize: '0.7rem',
-          color: '#E2E8F0',
-          zIndex: 10,
-          pointerEvents: 'none',
-        }}
-      >
-        <Compass size={12} style={{ color: '#52B788' }} />
-        <span>Shared Real-World Coordinates</span>
-      </div>
     </div>
   );
 };

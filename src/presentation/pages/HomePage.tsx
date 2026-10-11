@@ -73,7 +73,7 @@ export const HomePage: React.FC = () => {
           {/* Headline */}
           <h1
             style={{
-              fontFamily: 'var(--font-serif)',
+              fontFamily: 'font-nesiota',
               fontSize: 'clamp(2.5rem, 5.5vw, 4.4rem)',
               fontWeight: 700,
               lineHeight: 1.15,
@@ -95,6 +95,7 @@ export const HomePage: React.FC = () => {
               margin: '0 auto 2.5rem',
               lineHeight: 1.7,
               fontWeight: 400,
+              fontFamily: 'font-nesiota',
             }}
           >
             A collective field log of secret gorges, misty alpine ridgelines, secluded coastal grottos,
@@ -232,76 +233,89 @@ export const HomePage: React.FC = () => {
               gap: '1.5rem',
             }}
           >
-            {CATEGORIES.map((category) => (
-              <Link
-                key={category.key}
-                to={`/explore?category=${category.key}`}
-                style={{
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '1.75rem',
-                  border: '1px solid var(--color-border)',
-                  boxShadow: 'var(--shadow-sm)',
-                  transition: 'transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-normal)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.85rem',
-                  textDecoration: 'none',
-                }}
-                className="category-card"
-              >
-                <div
+            {CATEGORIES.map((category, idx) => {
+              const tapeClass =
+                idx % 3 === 0
+                  ? 'tape-top-left'
+                  : idx % 3 === 1
+                    ? 'tape-top-right'
+                    : 'tape-top-center';
+
+              return (
+                <Link
+                  key={category.key}
+                  to={`/explore?category=${category.key}`}
                   style={{
-                    width: '46px',
-                    height: '46px',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: category.bgLight,
-                    color: category.accentColor,
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '3px',
+                    padding: '2.2rem 1.6rem 1.6rem',
+                    border: '1px solid rgba(221, 212, 192, 0.75)',
+                    boxShadow: '0 10px 28px rgba(45, 42, 35, 0.1), 0 2px 6px rgba(45, 42, 35, 0.05)',
+                    transition: 'transform var(--transition-normal), box-shadow var(--transition-normal)',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
+                    flexDirection: 'column',
+                    gap: '0.85rem',
+                    textDecoration: 'none',
+                    position: 'relative',
                   }}
+                  className={`category-card ${tapeClass}`}
                 >
-                  <Compass size={24} color={category.accentColor} />
-                </div>
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: '1.25rem',
-                    color: 'var(--color-forest)',
-                    fontWeight: 600,
-                    margin: 0,
-                  }}
-                >
-                  {category.label}
-                </h3>
-                <p
-                  style={{
-                    fontSize: '0.875rem',
-                    color: 'var(--color-charcoal-muted)',
-                    lineHeight: 1.6,
-                    margin: 0,
-                    flex: 1,
-                  }}
-                >
-                  {category.description}
-                </p>
-                <span
-                  style={{
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    color: 'var(--color-forest-light)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                  }}
-                >
-                  <span>Explore entries</span>
-                  <ArrowRight size={14} />
-                </span>
-              </Link>
-            ))}
+                  <div
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: category.bgLight,
+                      color: category.accentColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 700,
+                    }}
+                  >
+                    <Compass size={24} color={category.accentColor} />
+                  </div>
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-handwritten)',
+                        fontSize: '1.45rem',
+                        color: 'var(--color-forest)',
+                        fontWeight: 600,
+                        lineHeight: 1.2,
+                        marginBottom: '0.2rem',
+                      }}
+                    >
+                      "{category.label}"
+                    </div>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: '0.875rem',
+                      color: 'var(--color-charcoal-muted)',
+                      lineHeight: 1.6,
+                      margin: 0,
+                      flex: 1,
+                    }}
+                  >
+                    {category.description}
+                  </p>
+                  <span
+                    style={{
+                      fontSize: '0.8125rem',
+                      fontWeight: 700,
+                      color: 'var(--color-forest-light)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <span>Explore entries</span>
+                    <ArrowRight size={14} />
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

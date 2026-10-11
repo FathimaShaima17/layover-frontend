@@ -6,12 +6,30 @@ import {
 } from '../../domain/repositories/PlaceRepository';
 import { INITIAL_MOCK_PLACES } from '../../data/mockPlaces';
 
+const CUSTOM_PLACES_KEY = 'hiddenatlas_custom_places';
+
+function getStoredCustomPlaces(): Place[] {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(CUSTOM_PLACES_KEY);
+      if (raw) {
+        return JSON.parse(raw);
+      }
+    }
+  } catch (err) {
+    console.warn('[HiddenAtlas] Failed to load custom places from localStorage:', err);
+  }
+  return [];
+}
+
 export class MockPlaceRepository implements PlaceRepository {
   private places: Place[];
 
   constructor(initialData: Place[] = INITIAL_MOCK_PLACES) {
-    // Clone initial dataset into in-memory state
-    this.places = [...initialData];
+    // Merge stored custom places with initial mock data
+    const stored = getStoredCustomPlaces();
+    const storedIds = new Set(stored.map((p) => p.id));
+    this.places = [...stored, ...initialData.filter((p) => !storedIds.has(p.id))];
   }
 
   async getAll(filter?: PlaceFilterOptions): Promise<Place[]> {
@@ -76,13 +94,27 @@ export class MockPlaceRepository implements PlaceRepository {
       ...input,
       id: `place-custom-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       createdAt: new Date().toISOString(),
-      status: 'pending', // Per requirements: new submissions are marked as pending review
+      status: 'approved', // Auto-approved for interactive 3D world prototype
       rating: 5.0,
       reviewsCount: 1,
     };
 
-    // Prepend to places so new discoveries appear at the top of lists
+    // Prepend to places so new discoveries appear at the top
     this.places = [newPlace, ...this.places];
+
+    // Persist to localStorage for navigation & refresh resilience
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const stored = getStoredCustomPlaces();
+        localStorage.setItem(
+          CUSTOM_PLACES_KEY,
+          JSON.stringify([newPlace, ...stored.filter((p) => p.id !== newPlace.id)])
+        );
+      }
+    } catch (err) {
+      console.warn('[HiddenAtlas] Failed to save custom place to localStorage:', err);
+    }
+
     return { ...newPlace };
   }
 

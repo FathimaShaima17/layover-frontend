@@ -77,14 +77,17 @@ export const SavedPlacesPage: React.FC = () => {
         {/* If user has no bookmarks at all */}
         {savedCount === 0 && !isLoading ? (
           <div
+            className="form-polaroid tape-top-center"
             style={{
-              backgroundColor: 'var(--bg-surface)',
-              borderRadius: 'var(--radius-xl)',
-              border: '1.5px dashed var(--color-border)',
-              padding: '5rem 2rem',
+              backgroundColor: '#FFFFFF',
+              borderRadius: '3px',
+              border: '1px solid rgba(221, 212, 192, 0.75)',
+              padding: '4rem 2rem 3rem',
               textAlign: 'center',
               maxWidth: '560px',
               margin: '3rem auto',
+              boxShadow: '0 16px 44px rgba(45, 42, 35, 0.12), 0 3px 10px rgba(45, 42, 35, 0.06)',
+              position: 'relative',
             }}
           >
             <div
@@ -112,6 +115,9 @@ export const SavedPlacesPage: React.FC = () => {
             >
               Your Atlas is Empty
             </h2>
+            <div style={{ fontFamily: 'var(--font-handwritten)', fontSize: '1.45rem', color: 'var(--color-forest)', marginBottom: '1rem' }}>
+              "No secret coordinates pinned yet"
+            </div>
             <p
               style={{
                 fontSize: '1rem',
@@ -132,17 +138,20 @@ export const SavedPlacesPage: React.FC = () => {
           <>
             {/* Filter Bar within Saved Places */}
             <div
+              className="form-polaroid tape-top-left"
               style={{
-                backgroundColor: 'var(--bg-surface)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--color-border)',
-                padding: '1.25rem 1.5rem',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '3px',
+                border: '1px solid rgba(221, 212, 192, 0.75)',
+                padding: '1.75rem 1.5rem 1.5rem',
+                boxShadow: '0 10px 28px rgba(45, 42, 35, 0.1), 0 2px 6px rgba(45, 42, 35, 0.05)',
                 marginBottom: '2.5rem',
                 display: 'flex',
                 flexWrap: 'wrap',
                 gap: '1rem',
                 alignItems: 'center',
                 justifyContent: 'space-between',
+                position: 'relative',
               }}
             >
               {/* Search input */}

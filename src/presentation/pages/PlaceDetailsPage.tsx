@@ -223,29 +223,51 @@ export const PlaceDetailsPage: React.FC = () => {
 
         {/* Photo Gallery & Showcase */}
         <div style={{ marginBottom: '3rem' }}>
-          {/* Main Large Cover Display */}
+          {/* Main Large Cover Display (Taped Grand Polaroid) */}
           <div
+            className="polaroid-card tape-top-center"
             style={{
               position: 'relative',
               width: '100%',
-              height: 'clamp(320px, 45vw, 540px)',
-              borderRadius: 'var(--radius-xl)',
-              overflow: 'hidden',
-              boxShadow: 'var(--shadow-md)',
-              border: '1px solid var(--color-border)',
-              backgroundColor: 'var(--bg-surface-subtle)',
+              backgroundColor: '#FFFFFF',
+              borderRadius: '3px',
+              padding: '16px 16px 22px 16px',
+              boxShadow: '0 16px 44px rgba(45, 42, 35, 0.14), 0 3px 10px rgba(45, 42, 35, 0.06)',
+              border: '1px solid rgba(221, 212, 192, 0.75)',
             }}
           >
-            <img
-              src={images[selectedImageIndex]}
-              alt={`${place.name} photograph`}
+            <div
               style={{
                 width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                transition: 'opacity 0.2s ease',
+                height: 'clamp(320px, 45vw, 540px)',
+                overflow: 'hidden',
+                borderRadius: '1px',
+                backgroundColor: 'var(--bg-surface-subtle)',
               }}
-            />
+            >
+              <img
+                src={images[selectedImageIndex]}
+                alt={`${place.name} photograph`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transition: 'opacity 0.2s ease',
+                }}
+              />
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-handwritten)',
+                fontSize: '1.75rem',
+                color: 'var(--color-forest)',
+                textAlign: 'center',
+                marginTop: '0.9rem',
+                fontWeight: 600,
+              }}
+            >
+              "{place.name}"
+            </div>
           </div>
 
           {/* Thumbnails row if more than 1 image */}
@@ -438,15 +460,17 @@ export const PlaceDetailsPage: React.FC = () => {
 
           {/* Right Column: Visitor Essentials & Geographic Details */}
           <aside
+            className="form-polaroid tape-top-right"
             style={{
-              backgroundColor: 'var(--bg-surface)',
-              borderRadius: 'var(--radius-xl)',
-              border: '1px solid var(--color-border)',
-              padding: '2rem',
-              boxShadow: 'var(--shadow-sm)',
+              backgroundColor: '#FFFFFF',
+              borderRadius: '3px',
+              border: '1px solid rgba(221, 212, 192, 0.75)',
+              padding: '2.4rem 2rem 2rem',
+              boxShadow: '0 12px 32px rgba(45, 42, 35, 0.11), 0 2px 8px rgba(45, 42, 35, 0.05)',
               display: 'flex',
               flexDirection: 'column',
               gap: '1.5rem',
+              position: 'relative',
             }}
           >
             <h3

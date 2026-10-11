@@ -34,13 +34,15 @@ export const FilterBar: React.FC<FilterBarProps> = ({
 }) => {
   return (
     <div
+      className="form-polaroid tape-top-left"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        borderRadius: 'var(--radius-lg)',
-        border: '1px solid var(--color-border)',
-        padding: '1.5rem',
-        boxShadow: 'var(--shadow-sm)',
+        backgroundColor: '#FFFFFF',
+        borderRadius: '3px',
+        border: '1px solid rgba(221, 212, 192, 0.75)',
+        padding: '1.85rem 1.5rem 1.5rem',
+        boxShadow: '0 12px 30px rgba(45, 42, 35, 0.1), 0 2px 6px rgba(45, 42, 35, 0.05)',
         marginBottom: '2.5rem',
+        position: 'relative',
       }}
     >
       {/* Top Row: Search Input & Sort Selector */}

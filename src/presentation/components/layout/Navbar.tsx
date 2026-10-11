@@ -3,11 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Compass, Bookmark, PlusCircle, Globe, Menu, X, LogIn, LogOut } from 'lucide-react';
 import { useSavedPlaces } from '../../context/SavedPlacesContext';
 import { useAuth } from '../../context/AuthContext';
-import { FutureWorldModal } from '../common/FutureWorldModal';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [is3DModalOpen, setIs3DModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { savedCount } = useSavedPlaces();
@@ -470,7 +468,6 @@ export const Navbar: React.FC = () => {
           }
         }
       `}</style>
-      <FutureWorldModal isOpen={is3DModalOpen} onClose={() => setIs3DModalOpen(false)} />
     </header>
   );
 };

@@ -91,7 +91,7 @@ export const SignUpPage: React.FC = () => {
   });
 
   return (
-    <div style={{ paddingTop: '2.5rem', paddingBottom: '6rem' }}>
+    <div className="sign-page" style={{ paddingTop: '2.5rem', paddingBottom: '6rem' }}>
       <div className="container" style={{ maxWidth: '460px' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
@@ -129,14 +129,21 @@ export const SignUpPage: React.FC = () => {
 
         {/* Sign Up Card */}
         <div
+          className="form-polaroid tape-top-center"
           style={{
-            backgroundColor: 'var(--bg-surface)',
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid var(--color-border)',
-            padding: '2.25rem',
-            boxShadow: 'var(--shadow-md)',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '3px',
+            border: '1px solid rgba(221, 212, 192, 0.75)',
+            padding: '2.5rem 2.25rem 2.25rem',
+            boxShadow: '0 16px 48px rgba(45, 42, 35, 0.14), 0 3px 10px rgba(45, 42, 35, 0.06)',
+            position: 'relative',
           }}
         >
+          <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+            <span style={{ fontFamily: 'var(--font-handwritten)', fontSize: '1.45rem', color: 'var(--color-forest)', fontWeight: 600 }}>
+              "Begin your journey with HiddenAtlas"
+            </span>
+          </div>
           {submitError && (
             <div
               style={{

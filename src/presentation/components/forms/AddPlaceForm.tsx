@@ -57,7 +57,12 @@ export const AddPlaceForm: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === 'latitude' || name === 'longitude') {
+      const numVal = value === '' ? '' : Number(value);
+      setFormData((prev) => ({ ...prev, [name]: numVal }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
     // Clear field-specific error on change
     if (formErrors[name]) {
       setFormErrors((prev) => {
@@ -98,13 +103,81 @@ export const AddPlaceForm: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setFormData((prev) => ({
-        ...prev,
-        imageUrls: [previewUrl, ...prev.imageUrls],
-      }));
-      showToast('Image Loaded', 'Local file preview ready for submission.', 'info');
+      if (!file.type.startsWith('image/')) {
+        showToast('Invalid File', 'Please select a valid image file (PNG, JPG, WEBP).', 'error');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('File Too Large', 'Please select an image smaller than 5MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          setFormData((prev) => ({
+            ...prev,
+            imageUrls: [reader.result as string, ...prev.imageUrls.filter((u) => !u.startsWith('blob:'))],
+          }));
+          showToast('Image Loaded', 'Local photograph attached and preview ready for submission.', 'info');
+        }
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleUseDemoLocation = () => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: 11.2588,
+      longitude: 75.7675,
+      location: prev.location || 'Kozhikode Beach, Kerala, India',
+    }));
+    showToast('Demo Location Set', 'Set coordinates to Kozhikode Beach (11.2588, 75.7675).', 'info');
+  };
+
+  const handleUseNearbyPondLocation = () => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: 11.2650,
+      longitude: 75.7720,
+      location: prev.location || 'Near Kozhikode Beach, Kerala, India',
+    }));
+    showToast('Nearby Coordinates Set', 'Coordinates set ~800m from Kozhikode Beach.', 'info');
+  };
+
+  const handleUseTinkerLocation = () => {
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || 'Tinker space',
+      description: prev.description || 'A vibrant community makerspace near the beach where creators gather to build projects.',
+      category: 'culture',
+      type: 'hidden-gem',
+      latitude: 11.2610,
+      longitude: 75.7720,
+      location: 'Near Kozhikode Beach, Calicut, Kerala',
+    }));
+    showToast('TinkerSpace Location Set', 'Coordinates set near Kozhikode Beach (11.2610, 75.7720).', 'info');
+  };
+
+  const handleUseDeviceLocation = () => {
+    if (!navigator.geolocation) {
+      showToast('Geolocation Unavailable', 'Your browser does not support geolocation.', 'error');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setFormData((prev) => ({
+          ...prev,
+          latitude: Number(pos.coords.latitude.toFixed(4)),
+          longitude: Number(pos.coords.longitude.toFixed(4)),
+        }));
+        showToast('Device Location Detected', `Coordinates updated to ${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}.`, 'success');
+      },
+      (err) => {
+        showToast('Location Access Denied', 'Using simulated Kozhikode demo location instead. ' + err.message, 'warning');
+      },
+      { timeout: 8000 }
+    );
   };
 
   const handleRemoveImage = (index: number) => {
@@ -186,17 +259,22 @@ export const AddPlaceForm: React.FC = () => {
   if (submittedSuccess) {
     return (
       <div
+        className="form-polaroid tape-top-center"
         style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--color-border)',
-          padding: '3.5rem 2rem',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '3px',
+          border: '1px solid rgba(221, 212, 192, 0.75)',
+          padding: '3.5rem 2rem 2.5rem',
           textAlign: 'center',
           maxWidth: '640px',
-          margin: '2rem auto',
-          boxShadow: 'var(--shadow-md)',
+          margin: '2.5rem auto',
+          boxShadow: '0 16px 48px rgba(45, 42, 35, 0.14), 0 3px 10px rgba(45, 42, 35, 0.06)',
+          position: 'relative',
         }}
       >
+        <div style={{ fontFamily: 'var(--font-handwritten)', fontSize: '1.6rem', color: 'var(--color-forest)', marginBottom: '1rem' }}>
+          "Discovery Logged in the Shared Atlas"
+        </div>
         <div
           style={{
             width: '72px',
@@ -248,12 +326,18 @@ export const AddPlaceForm: React.FC = () => {
           ℹ️ <strong>Note on Storage:</strong> Your submission is stored in frontend state and mock repository for the active session. As specified in project requirements, data is not sent to a live external database.
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.85rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Button
             variant="primary"
+            onClick={() => navigate('/world', { state: { selectedPlaceId: submittedSuccess.id } })}
+          >
+            Enter 3D World
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => navigate(`/place/${submittedSuccess.id}`)}
           >
-            View Destination Details
+            View Details
           </Button>
           <Button
             variant="outline"
@@ -296,16 +380,30 @@ export const AddPlaceForm: React.FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
+      className="form-polaroid tape-top-center"
       style={{
-        backgroundColor: 'var(--bg-surface)',
-        borderRadius: 'var(--radius-xl)',
-        border: '1px solid var(--color-border)',
-        padding: '2.5rem',
-        boxShadow: 'var(--shadow-md)',
+        backgroundColor: '#FFFFFF',
+        borderRadius: '3px',
+        border: '1px solid rgba(221, 212, 192, 0.75)',
+        padding: '3rem 2.5rem 2.5rem',
+        boxShadow: '0 16px 48px rgba(45, 42, 35, 0.12), 0 3px 10px rgba(45, 42, 35, 0.06)',
         maxWidth: '820px',
-        margin: '0 auto',
+        margin: '1rem auto 0',
+        position: 'relative',
       }}
     >
+      {/* Handwritten Expedition Caption Header */}
+      <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+        <div style={{
+          fontFamily: 'var(--font-handwritten)',
+          fontSize: '1.65rem',
+          fontWeight: 600,
+          color: 'var(--color-forest)',
+          lineHeight: 1.25,
+        }}>
+          "Record your uncharted discovery for fellow explorers"
+        </div>
+      </div>
       {/* Form Notice Banner */}
       <div
         style={{
@@ -769,7 +867,7 @@ export const AddPlaceForm: React.FC = () => {
                 name="latitude"
                 value={formData.latitude}
                 onChange={handleInputChange}
-                placeholder="e.g. 46.3384"
+                placeholder="e.g. 11.2588 (Kozhikode Beach)"
                 style={{
                   width: '100%',
                   padding: '0.65rem 0.85rem',
@@ -805,7 +903,7 @@ export const AddPlaceForm: React.FC = () => {
                 name="longitude"
                 value={formData.longitude}
                 onChange={handleInputChange}
-                placeholder="e.g. 13.5528"
+                placeholder="e.g. 75.7675 (Kozhikode Beach)"
                 style={{
                   width: '100%',
                   padding: '0.65rem 0.85rem',
@@ -820,6 +918,89 @@ export const AddPlaceForm: React.FC = () => {
                 </span>
               )}
             </div>
+          </div>
+
+          {/* Quick Location Helpers */}
+          <div
+            style={{
+              marginTop: '1rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              alignItems: 'center',
+            }}
+          >
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 600 }}>
+              Quick Fill:
+            </span>
+            <button
+              type="button"
+              onClick={handleUseDemoLocation}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '999px',
+                backgroundColor: 'rgba(45, 106, 79, 0.1)',
+                border: '1px solid rgba(45, 106, 79, 0.3)',
+                color: 'var(--color-forest)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-nesiota)',
+              }}
+            >
+              📍 Kozhikode Beach (11.2588, 75.7675)
+            </button>
+            <button
+              type="button"
+              onClick={handleUseNearbyPondLocation}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '999px',
+                backgroundColor: 'rgba(30, 144, 255, 0.1)',
+                border: '1px solid rgba(30, 144, 255, 0.3)',
+                color: '#0284C7',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-nesiota)',
+              }}
+            >
+              💧 Nearby Pond (~800m north-east)
+            </button>
+            <button
+              type="button"
+              onClick={handleUseTinkerLocation}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '999px',
+                backgroundColor: 'rgba(217, 119, 6, 0.1)',
+                border: '1px solid rgba(217, 119, 6, 0.3)',
+                color: '#D97706',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-nesiota)',
+              }}
+            >
+              🏠 TinkerSpace / My Stay (11.2610, 75.7720)
+            </button>
+            <button
+              type="button"
+              onClick={handleUseDeviceLocation}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: '999px',
+                backgroundColor: 'rgba(107, 70, 193, 0.1)',
+                border: '1px solid rgba(107, 70, 193, 0.3)',
+                color: '#6B46C1',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontFamily: 'var(--font-nesiota)',
+              }}
+            >
+              📱 Use My Device Location
+            </button>
           </div>
 
           {formErrors.coordinates && (

@@ -41,11 +41,14 @@ export const PlacesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setError(null);
     try {
       const data = await getPlacesUseCase.execute();
+      const mockData = await mockPlaceRepository.getAll();
       if (data && data.length > 0) {
-        setPlaces(data);
+        // Merge backend places with any local custom places from mockPlaceRepository
+        const dataIds = new Set(data.map((p) => p.id));
+        const merged = [...data, ...mockData.filter((p) => !dataIds.has(p.id))];
+        setPlaces(merged);
       } else {
-        const fallback = await mockPlaceRepository.getAll();
-        setPlaces(fallback);
+        setPlaces(mockData);
       }
     } catch (err: unknown) {
       console.info('[HiddenAtlas] Backend unavailable, loading local discoveries dataset:', err);
@@ -84,10 +87,33 @@ export const PlacesProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const submitPlace = useCallback(
     async (dto: SubmitPlaceFormDto): Promise<Place> => {
-      const created = await submitPlaceUseCase.execute(dto);
-      // Immediately reflect newly created place in context state
-      setPlaces((prev) => [created, ...prev]);
-      return created;
+      try {
+        const created = await submitPlaceUseCase.execute(dto);
+        const approvedCreated = { ...created, status: 'approved' as const };
+        // Immediately reflect newly created place in context state
+        setPlaces((prev) => [approvedCreated, ...prev]);
+        return approvedCreated;
+      } catch (err: unknown) {
+        console.warn('[HiddenAtlas] API submit fallback to mockPlaceRepository:', err);
+        const created = await mockPlaceRepository.create({
+          name: dto.name.trim(),
+          description: dto.description.trim(),
+          story: dto.story?.trim(),
+          category: dto.category,
+          type: dto.type,
+          location: dto.location.trim(),
+          coordinates:
+            dto.latitude !== '' && dto.longitude !== '' && dto.latitude !== undefined && dto.longitude !== undefined
+              ? { latitude: Number(dto.latitude), longitude: Number(dto.longitude) }
+              : undefined,
+          images: dto.imageUrls.filter((u) => u && u.trim().length > 0),
+          bestTimeToVisit: dto.bestTimeToVisit?.trim(),
+          tags: dto.tags.length > 0 ? dto.tags : ['community-discovery'],
+          submittedBy: 'Community Explorer (You)',
+        });
+        setPlaces((prev) => [created, ...prev]);
+        return created;
+      }
     },
     [submitPlaceUseCase]
   );
