@@ -12,27 +12,40 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/common/Button';
+import { isMockAuthEnabled } from '../../infrastructure/auth/mockAuth';
 
 /**
- * Demo accounts seeded on the backend — all share the password `demo1234`.
+ * Demo accounts for one-click sign-in.
+ *
+ * Mock-auth mode (VITE_USE_MOCK_AUTH=true): only the preset
+ * account exists — no backend is seeded or contacted.
+ * Backend mode: the backend seeds these explorers on launch.
  */
-const DEMO_ACCOUNTS = [
-  {
-    label: 'Elena Rostova',
-    hint: 'Alpine Guide',
-    email: 'elena.rostova@explorer.org',
-  },
-  {
-    label: 'Mateo Silva',
-    hint: 'Coastal Scout',
-    email: 'mateo.silva@wanderlust.net',
-  },
-  {
-    label: 'Amina Kassam',
-    hint: 'Heritage Chronicler',
-    email: 'amina.k@atlasvoyager.io',
-  },
-] as const;
+const DEMO_ACCOUNTS = isMockAuthEnabled()
+  ? [
+      {
+        label: 'Elena',
+        hint: 'Preset demo account',
+        email: 'demo@hiddenatlas.com',
+      },
+    ]
+  : ([
+      {
+        label: 'Elena Rostova',
+        hint: 'Alpine Guide',
+        email: 'elena.rostova@explorer.org',
+      },
+      {
+        label: 'Mateo Silva',
+        hint: 'Coastal Scout',
+        email: 'mateo.silva@wanderlust.net',
+      },
+      {
+        label: 'Amina Kassam',
+        hint: 'Heritage Chronicler',
+        email: 'amina.k@atlasvoyager.io',
+      },
+    ] as const);
 
 interface FormErrors {
   email?: string;
@@ -393,8 +406,20 @@ export const SignInPage: React.FC = () => {
               lineHeight: 1.5,
             }}
           >
-            All demo accounts use the password <code style={{ fontWeight: 700 }}>demo1234</code>.
-            Accounts are created automatically on the backend on first launch.
+            {isMockAuthEnabled() ? (
+              <>
+                The demo account uses the password{' '}
+                <code style={{ fontWeight: 700 }}>demo1234</code>.
+                New accounts are stored in your browser's local storage — no
+                server involved.
+              </>
+            ) : (
+              <>
+                All demo accounts use the password{' '}
+                <code style={{ fontWeight: 700 }}>demo1234</code>.
+                Accounts are created automatically on the backend on first launch.
+              </>
+            )}
           </p>
         </div>
       </div>

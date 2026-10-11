@@ -1,4 +1,12 @@
 import { UserProfile } from '../storage/LocalStorageService';
+import {
+  isMockAuthEnabled,
+  mockLogin,
+  mockSignup,
+  getMockSession,
+  mockUpdateProfile,
+  MOCK_AUTH_TOKEN,
+} from '../auth/mockAuth';
 
 /**
  * API response envelope returned by the auth endpoints.
@@ -20,6 +28,10 @@ interface AuthApiResponse {
  *
  * Set VITE_API_URL in your .env file to point at the backend.
  * Defaults to http://localhost:5000 for local development.
+ *
+ * When VITE_USE_MOCK_AUTH=true every method delegates to the
+ * frontend-only mock (src/infrastructure/auth/mockAuth.ts) and
+ * no network call is made.
  */
 export class ApiAuthRepository {
   private readonly baseUrl: string;
@@ -73,6 +85,10 @@ export class ApiAuthRepository {
   // ─── Auth API ───────────────────────────────────────────────────────
 
   async login(email: string, password: string): Promise<{ token: string; user: UserProfile }> {
+    if (isMockAuthEnabled()) {
+      const user = await mockLogin(email, password);
+      return { token: MOCK_AUTH_TOKEN, user };
+    }
     return this.request<{ token: string; user: UserProfile }>(
       '/api/auth/login',
       this.jsonInit('POST', { email, password })
@@ -84,6 +100,10 @@ export class ApiAuthRepository {
     email: string,
     password: string
   ): Promise<{ token: string; user: UserProfile }> {
+    if (isMockAuthEnabled()) {
+      const user = await mockSignup(name, email, password);
+      return { token: MOCK_AUTH_TOKEN, user };
+    }
     return this.request<{ token: string; user: UserProfile }>(
       '/api/auth/register',
       this.jsonInit('POST', { name, email, password })
@@ -91,6 +111,13 @@ export class ApiAuthRepository {
   }
 
   async me(token: string): Promise<UserProfile> {
+    if (isMockAuthEnabled()) {
+      const session = getMockSession();
+      if (!session) {
+        throw new Error('No active mock session');
+      }
+      return session;
+    }
     return this.request<UserProfile>('/api/auth/me', this.jsonInit('GET', undefined, token));
   }
 
@@ -98,6 +125,13 @@ export class ApiAuthRepository {
     token: string,
     patch: { name?: string; bio?: string; avatarUrl?: string }
   ): Promise<UserProfile> {
+    if (isMockAuthEnabled()) {
+      const updated = mockUpdateProfile(patch);
+      if (!updated) {
+        throw new Error('You must be signed in to update your profile.');
+      }
+      return updated;
+    }
     return this.request<UserProfile>(
       '/api/auth/profile',
       this.jsonInit('PATCH', patch, token)

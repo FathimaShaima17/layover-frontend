@@ -9,6 +9,12 @@ import React, {
 import { UserProfile, localStorageService } from '../../infrastructure/storage/LocalStorageService';
 import { apiAuthRepository } from '../../infrastructure/repositories/ApiAuthRepository';
 import { apiPlaceRepository } from '../../infrastructure/repositories/ApiPlaceRepository';
+import {
+  isMockAuthEnabled,
+  getMockSession,
+  mockLogout,
+  MOCK_AUTH_TOKEN,
+} from '../../infrastructure/auth/mockAuth';
 import { AUTH_EXPIRED_EVENT } from '../../shared/constants/authEvents';
 
 const TOKEN_KEY = 'hiddenatlas_auth_token';
@@ -57,13 +63,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<UserProfile | null>(() => readStoredUser());
   const [token, setToken] = useState<string | null>(() => readStoredToken());
-  const [isLoading, setIsLoading] = useState<boolean>(Boolean(token));
+  const [isLoading, setIsLoading] = useState<boolean>(
+    () =>
+      Boolean(token) ||
+      (isMockAuthEnabled() && Boolean(getMockSession()))
+  );
 
-  // ─── Session bootstrap: validate stored token against the backend ───
+  // ─── Session bootstrap: restore the stored session ───
   useEffect(() => {
     let cancelled = false;
 
     async function bootstrap(): Promise<void> {
+      // Mock auth (VITE_USE_MOCK_AUTH=true): restore the
+      // localStorage session directly — no backend round-trip.
+      if (isMockAuthEnabled()) {
+        const session = getMockSession();
+        if (!cancelled) {
+          if (session) {
+            setUser(session);
+            setToken(MOCK_AUTH_TOKEN);
+            localStorageService.saveUserProfile(session);
+            apiPlaceRepository.setAuthToken(MOCK_AUTH_TOKEN);
+          }
+          setIsLoading(false);
+        }
+        return;
+      }
+
       const storedToken = readStoredToken();
       if (!storedToken) {
         setIsLoading(false);
@@ -132,6 +158,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       window.localStorage.removeItem(USER_KEY);
     } catch {
       // ignore
+    }
+    if (isMockAuthEnabled()) {
+      mockLogout();
     }
     setToken(null);
     setUser(null);

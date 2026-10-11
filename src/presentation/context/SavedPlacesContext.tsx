@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { Place } from '../../domain/entities/Place';
 import { SavePlaceUseCase } from '../../application/use-cases/SavePlace';
 import { apiPlaceRepository } from '../../infrastructure/repositories/ApiPlaceRepository';
+import { mockPlaceRepository } from '../../infrastructure/repositories/MockPlaceRepository';
 import { localStorageService } from '../../infrastructure/storage/LocalStorageService';
 import { useToast } from './ToastContext';
 
@@ -33,10 +34,16 @@ export const SavedPlacesProvider: React.FC<{ children: React.ReactNode }> = ({ c
     try {
       const ids = savePlaceUseCase.getSavedIds();
       setSavedIds(ids);
-      const places = await savePlaceUseCase.getSavedPlaces();
-      setSavedPlaces(places);
+      try {
+        setSavedPlaces(await savePlaceUseCase.getSavedPlaces());
+      } catch {
+        // Backend unreachable (e.g. mock-auth demo mode) —
+        // resolve bookmarked IDs against the local dataset,
+        // which includes places created in localStorage.
+        setSavedPlaces(await mockPlaceRepository.getSavedPlaces(ids));
+      }
     } catch {
-      // Fallback
+      setSavedPlaces([]);
     } finally {
       setIsLoading(false);
     }

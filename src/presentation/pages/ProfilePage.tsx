@@ -16,6 +16,7 @@ import { useSavedPlaces } from '../context/SavedPlacesContext';
 import { useToast } from '../context/ToastContext';
 import { Breadcrumbs } from '../components/navigation/Breadcrumbs';
 import { Button } from '../components/common/Button';
+import { isMockAuthEnabled } from '../../infrastructure/auth/mockAuth';
 
 /**
  * Explorer profile — shows the signed-in user's real account data
@@ -278,7 +279,7 @@ export const ProfilePage: React.FC = () => {
                 <span>Verified</span>
               </div>
               <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
-                JWT Authenticated Account
+                {isMockAuthEnabled() ? 'Local demo session' : 'JWT Authenticated Account'}
               </div>
             </div>
           </div>
